@@ -9,6 +9,16 @@ export async function findUserByEmail(email: string) {
   return user;
 }
 
+export async function findUserByRegistrationNumber(
+  registration_number: number,
+) {
+  const user = await prisma.user.findUnique({
+    where: { registration_number },
+  });
+
+  return user;
+}
+
 export async function createUser(data: Prisma.UserCreateInput) {
   const user = await prisma.user.create({
     data,
@@ -24,6 +34,7 @@ export async function getUserById(id: string) {
       id: true,
       name: true,
       email: true,
+      registration_number: true,
       department: true,
       ramal: true,
     },

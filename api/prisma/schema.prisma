@@ -11,14 +11,15 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  password_hash String
-  department    String
-  ramal         Int
-  role          String   @default("MEMBER")
-  created_at    DateTime @default(now())
+  id                  String   @id @default(uuid())
+  name                String
+  email               String   @unique
+  password_hash       String
+  registration_number Int      @unique
+  department          String
+  ramal               Int
+  role                String   @default("MEMBER")
+  created_at          DateTime @default(now())
 
   @@map("users")
 }

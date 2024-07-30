@@ -14,6 +14,7 @@ const bodySchema = z.object({
   password: z
     .string({ message: 'Password is mandatory' })
     .min(6, { message: 'Password must have at least 6 characters' }),
+  registration_number: z.number({ message: 'Registration is mandatory' }),
   department: z
     .string({ message: 'Department is mandatory' })
     .min(3, 'Department must have at least 3 characters'),
@@ -21,13 +22,18 @@ const bodySchema = z.object({
 });
 
 export const registerUserHandler = async (request: FastifyRequest) => {
-  const { name, email, password, department, ramal } = bodySchema.parse(
-    request.body,
-  );
+  const { name, email, password, department, ramal, registration_number } =
+    bodySchema.parse(request.body);
 
   const verifyEmailAlready = await findUserByEmail(email);
 
-  if (verifyEmailAlready) throw new ClientError('E-mail already registered');
+  if (verifyEmailAlready)
+    throw new ClientError(409, 'E-mail already registered');
+
+  const verifyRegistrationNumerAlready = await findUserByEmail(email);
+
+  if (verifyRegistrationNumerAlready)
+    throw new ClientError(409, 'Registration number already registered');
 
   const password_hash = await hash(password, 6);
 
@@ -35,6 +41,7 @@ export const registerUserHandler = async (request: FastifyRequest) => {
     name,
     email,
     password_hash,
+    registration_number,
     department,
     ramal,
   });

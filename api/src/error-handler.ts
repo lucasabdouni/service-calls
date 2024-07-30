@@ -13,7 +13,7 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   }
 
   if (error instanceof ClientError) {
-    return reply.status(400).send({
+    return reply.status(Number(error.code)).send({
       message: error.message,
     });
   }
