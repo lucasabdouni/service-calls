@@ -1,8 +1,11 @@
-import fastify from 'fastify';
+import { app } from './app';
 import { env } from './env';
 
-const app = fastify();
-
-app.listen({ port: env.PORT }).then(() => {
-  console.log('Server listening on port 3333');
-});
+app
+  .listen({
+    host: '0.0.0.0',
+    port: env.PORT,
+  })
+  .then(() => {
+    console.log('🚀 HTTP Server Running!');
+  });
