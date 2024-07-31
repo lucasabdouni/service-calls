@@ -3,6 +3,7 @@ import fastify from 'fastify';
 import { env } from './env';
 import { errorHandler } from './error-handler';
 import { authenticateRoutes } from './routes/authenticate/routes';
+import { serviceRoutes } from './routes/service/routes';
 import { userRoutes } from './routes/user/routes';
 
 export const app = fastify();
@@ -16,5 +17,6 @@ app.register(fastifyJwt, {
 
 app.setErrorHandler(errorHandler);
 
-app.register(userRoutes);
 app.register(authenticateRoutes);
+app.register(userRoutes);
+app.register(serviceRoutes);
