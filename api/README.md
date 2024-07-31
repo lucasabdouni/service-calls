@@ -19,12 +19,12 @@ Service Call style app.
 
 ## RNs (Regras de negócios)
 - [x] O usuário não deve poder se cadastrar com um e-mail duplicado;
-- [] O chamado so pode ser respondido por um administrador;
-- [] O chamado so pode ser finalizado por um administrador;
+- [] Todo chamado cadastrado deve ser enviado por email para um administrador;
+- [] O chamado so pode ser respondido por um administrador ou responsavel da area;
+- [] O chamado so pode ser finalizado por um administrador ou responsavel da area;
 
 ## RNFS (Requisitos não-funcionais)
 - [x] A senha do usuário precisa estar criptografada;
 - [x] Os dados da aplicação precisam estar persistidos em um banco SQL;
 - [x] Deve ser retornar uma lista com apenas os chamados abertos no mes;
-- [] Todo chamado cadastrado deve ser enviado por email para um administrador;
 - [x] O usuário deve ser identificado por um JWT (JSON Web Token);
