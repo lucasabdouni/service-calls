@@ -1,7 +1,7 @@
 import { verifyJwt } from '@/middlewares/verify-jwt';
 import { FastifyInstance } from 'fastify';
 import { createServiceHandler } from './create-service';
-import { getServicesByIdHandler } from './get-services';
+import { getServicesHandler } from './get-services';
 
 export async function serviceRoutes(app: FastifyInstance) {
   app
@@ -9,5 +9,5 @@ export async function serviceRoutes(app: FastifyInstance) {
     .post('/service', { onRequest: [verifyJwt] }, createServiceHandler);
   app
     .withTypeProvider()
-    .get('/services', { onRequest: [verifyJwt] }, getServicesByIdHandler);
+    .get('/services', { onRequest: [verifyJwt] }, getServicesHandler);
 }
