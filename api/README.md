@@ -4,10 +4,11 @@ Service Call style app.
 ## RFs (Requisitos functionais)
 
 - [x] Deve ser possível se cadastrar;
-- [] Deve ser possível se autenticar;
+- [x] Deve ser possível se autenticar;
 - [x] Deve ser possível obter o perfil de um usuário logado;
-- [] Deve ser possível abrir um chamado de serviço;
-- [] Deve ser possível listar os chamados para o setor;
+- [x] Deve ser possível abrir um chamado de serviço;
+- [x] Deve ser possível listar os chamados para o setor;
+- [x] Deve ser possível listar os por periodo de tempo;
 - [] Deve ser possível obter o chamados abertos por um usuario;
 - [] Deve ser possível buscar chamado pelo ID;
 - [] Deve ser possível editar chamados aberto;
@@ -24,6 +25,6 @@ Service Call style app.
 ## RNFS (Requisitos não-funcionais)
 - [x] A senha do usuário precisa estar criptografada;
 - [x] Os dados da aplicação precisam estar persistidos em um banco SQL;
-- [] Deve ser retornar uma lista com apenas os chamados abertos no mes;
+- [x] Deve ser retornar uma lista com apenas os chamados abertos no mes;
 - [] Todo chamado cadastrado deve ser enviado por email para um administrador;
-- [] O usuário deve ser identificado por um JWT (JSON Web Token);
+- [x] O usuário deve ser identificado por um JWT (JSON Web Token);
