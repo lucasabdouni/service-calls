@@ -1,3 +1,4 @@
+import cors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import fastify from 'fastify';
 import { env } from './env';
@@ -7,6 +8,10 @@ import { serviceRoutes } from './routes/service/routes';
 import { userRoutes } from './routes/user/routes';
 
 export const app = fastify();
+
+app.register(cors, {
+  origin: '*',
+});
 
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
