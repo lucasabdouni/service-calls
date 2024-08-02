@@ -1,5 +1,9 @@
 import { ClientError } from '@/errors/client-erro';
-import { createUser, findUserByEmail } from '@/repositories/user-repository';
+import {
+  createUser,
+  findUserByEmail,
+  findUserByRegistrationNumber,
+} from '@/repositories/user-repository';
 import { hash } from 'bcryptjs';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
@@ -30,7 +34,8 @@ export const registerUserHandler = async (request: FastifyRequest) => {
   if (verifyEmailAlready)
     throw new ClientError(409, 'E-mail already registered');
 
-  const verifyRegistrationNumerAlready = await findUserByEmail(email);
+  const verifyRegistrationNumerAlready =
+    await findUserByRegistrationNumber(registration_number);
 
   if (verifyRegistrationNumerAlready)
     throw new ClientError(409, 'Registration number already registered');
