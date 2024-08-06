@@ -111,6 +111,21 @@ export async function updateService({
   return service;
 }
 
+export async function confirmAccomplisheService({
+  id,
+  data,
+}: {
+  id: string;
+  data: Prisma.ServiceUpdateInput;
+}) {
+  const service = await prisma.service.update({
+    where: { id },
+    data,
+  });
+
+  return service;
+}
+
 export async function deleteService(id: string) {
   const service = await prisma.service.delete({
     where: { id },

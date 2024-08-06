@@ -2,6 +2,7 @@ import { verifyJwt } from '@/middlewares/verify-jwt';
 import { verifyUserRole } from '@/middlewares/verify-user-role';
 import { Role } from '@/repositories/user-repository';
 import { FastifyInstance } from 'fastify';
+import { confirmAccomplishedServiceHandler } from './confirm-accomplished-service';
 import { createServiceHandler } from './create-service';
 import { deleteServiceHandler } from './delete-service';
 import { getServicesHandler } from './get-services';
@@ -65,5 +66,21 @@ export async function serviceRoutes(app: FastifyInstance) {
       onRequest: [verifyJwt],
     },
     deleteServiceHandler,
+  );
+  app.withTypeProvider().get(
+    '/accomplished/:serviceId',
+    {
+      onRequest: [
+        verifyJwt,
+        verifyUserRole(
+          Role.ADMIN,
+          Role.ELECTRICAL_RESPONSIBLE,
+          Role.MECANIC_RESPONSIBLE,
+          Role.SG_RESPONSIBLE,
+          Role.TI_RESPONSIBLE,
+        ),
+      ],
+    },
+    confirmAccomplishedServiceHandler,
   );
 }
