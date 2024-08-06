@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
 import { ErrorMessage } from '../../components/error-message';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/inputPassword';
+import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
 
 const registerFormSchema = z
@@ -35,6 +37,8 @@ const registerFormSchema = z
 type RegisterFormData = z.infer<typeof registerFormSchema>;
 
 export function SignUp() {
+  const { isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const {
     register,
@@ -43,6 +47,12 @@ export function SignUp() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, []);
 
   const specificErrorMessages: Record<number, Record<string, string>> = {
     409: {
@@ -65,6 +75,8 @@ export function SignUp() {
         ramal: Number(data.ramal),
         password: data.password,
       });
+
+      navigate('/');
     } catch (err) {
       if (err instanceof AxiosError) {
         const statusCode = err.response?.status;
@@ -169,12 +181,12 @@ export function SignUp() {
           <p className="text-base text-zinc-500">Já possui uma conta? .</p>
         </div>
 
-        <a
-          href="#"
+        <Link
+          to="/"
           className="bg-blue-600 w-48 p-3 rounded-xl text-zinc-50 text-center mt-3 hover:bg-blue-800"
         >
           Entrar
-        </a>
+        </Link>
       </div>
     </div>
   );

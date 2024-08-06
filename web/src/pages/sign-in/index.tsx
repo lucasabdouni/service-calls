@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { Lock, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
 import { ErrorMessage } from '../../components/error-message';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/inputPassword';
-import { api } from '../../lib/axios';
+import { AuthContext } from '../../context/AuthContext';
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: 'O email informado não é valido.' }),
@@ -20,6 +20,8 @@ const loginFormSchema = z.object({
 type LoginFormData = z.infer<typeof loginFormSchema>;
 
 export function SignIn() {
+  const { signIn, isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const {
     register,
@@ -29,19 +31,18 @@ export function SignIn() {
     resolver: zodResolver(loginFormSchema),
   });
 
-  async function handleLogin(data: LoginFormData) {
-    try {
-      await api.post('/sessions', {
-        email: data.email,
-        password: data.password,
-      });
-    } catch (err) {
-      if (err instanceof AxiosError && err.response?.status === 401) {
-        setErrorSubmitForm('Credenciais invalidas !');
-      } else {
-        setErrorSubmitForm('Tente novamente mais tarde');
-      }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
     }
+  }, []);
+
+  async function handleLogin(data: LoginFormData) {
+    await signIn(data).then((error) => {
+      if (error) {
+        setErrorSubmitForm(error);
+      }
+    });
   }
 
   return (
@@ -93,12 +94,12 @@ export function SignIn() {
           </p>
         </div>
 
-        <a
-          href="#"
+        <Link
+          to="cadastro"
           className="bg-blue-600 w-48 p-3 rounded-xl text-zinc-50 text-center mt-3 hover:bg-blue-800"
         >
           Cadastre-se
-        </a>
+        </Link>
       </div>
     </div>
   );
