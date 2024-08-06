@@ -28,10 +28,9 @@ const bodySchema = z.object({
   problem: z.string().optional(),
   problem_description: z.string().optional(),
   priority: PriorityEnum.optional(),
-  occurs_at: z.date().optional(),
+  occurs_at: z.coerce.date().optional(),
   responsible_accomplish: z.string().optional(),
   status: z.string().optional(),
-  accomplished: z.boolean().optional(),
 });
 
 const paramsSchema = z.object({
@@ -58,7 +57,10 @@ export const updateServiceHandler = async (request: FastifyRequest) => {
     );
   }
 
-  if (role !== Role.ADMIN && data.department !== departmentCheck) {
+  if (
+    role !== Role.ADMIN &&
+    checkServiceExists.department !== departmentCheck
+  ) {
     throw new ClientError(
       409,
       'User not authorized to update this department.',

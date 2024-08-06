@@ -5,6 +5,8 @@ export async function verifyJwt(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify();
   } catch (err) {
-    throw new ClientError(401, 'Unauthorized');
+    if (request.user) {
+      throw new ClientError(401, 'token.expired');
+    } else throw new ClientError(401, 'Unauthorized');
   }
 }
