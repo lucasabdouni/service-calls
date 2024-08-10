@@ -36,11 +36,7 @@ export const getServicesHandler = async (request: FastifyRequest) => {
     .toDate();
 
   if (starts_at && dayjs(startDate).isAfter(endDate)) {
-    throw new ClientError(401, 'Invalid start date');
-  }
-
-  if (ends_at && dayjs(endDate).isAfter(new Date())) {
-    throw new ClientError(401, 'Invalid end date');
+    throw new ClientError(401, 'Invalid date');
   }
 
   const department = CheckDepartmentFromRoles(role);

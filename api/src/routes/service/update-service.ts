@@ -20,7 +20,7 @@ const DepartmentEnumSchema = z.enum([
   Department.TI,
 ]);
 
-const PriorityEnum = z.enum(['baixa', 'media', 'alta']);
+const PriorityEnum = z.enum(['Baixa', 'Media', 'Alta']);
 
 const bodySchema = z.object({
   department: DepartmentEnumSchema.optional(),
@@ -78,7 +78,7 @@ export const updateServiceHandler = async (request: FastifyRequest) => {
 
     await Promise.all(
       responsables.map(async (responsable) => {
-        const serviceLink = `${env.WEB_URL}/services/${service.id}`;
+        const serviceLink = `${env.WEB_URL}/servico/${service.id}`;
 
         const message = await mail.sendMail({
           from: {

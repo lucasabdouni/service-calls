@@ -14,10 +14,10 @@ type serviceProps = {
 };
 
 export enum Department {
-  ELECTRICAL = 'ELECTRICAL',
-  MECANIC = 'MECANIC',
+  ELECTRICAL = 'Eletrica',
+  MECANIC = 'Mecanica',
   TI = 'TI',
-  SG = 'SG_RESPONSIBLE',
+  SG = 'Servicos Gerais',
 }
 
 export async function createService(data: serviceProps) {
