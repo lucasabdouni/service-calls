@@ -20,21 +20,22 @@ export default function MenuItens({
     <li>
       <a
         href={routerName}
-        className={`flex items-center justify-start gap-6 border-l-[6px] ${
+        className={`flex items-center justify-center lg:justify-start gap-6 lg:border-l-[6px] border-l-[4px] px-7 py-5 ${
           isActivity
             ? ` border-indigo-100 bg-gray-600 text-gray-100`
             : `text-gray-400 border-gray-700`
-        } text-base px-7 py-5 ${
+        } text-base w-full ${
           !isActivity &&
           `hover:bg-gray-600 hover:border-gray-600 hover:text-gray-100`
         }`}
       >
         <Icon
-          className={`size-5 ${
+          className={`size-4 sm:size-5 shrink-0 ${
             isActivity ? `text-gray-100` : `text-gray-400`
           } hover:text-gray-100`}
         />
-        {text}
+
+        <p className="hidden lg:block lg:pr-4">{text}</p>
       </a>
     </li>
   );
