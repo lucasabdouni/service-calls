@@ -41,7 +41,7 @@ const priorityVariants = tv({
   },
 });
 
-export const ServicesByUser: React.FC<ServicesByUserProps> = ({
+export const ServicesTable: React.FC<ServicesByUserProps> = ({
   data,
   handleDeleteService,
 }) => {
@@ -71,6 +71,8 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
       dataIndex: 'problem',
       key: 'problem',
       className: 'font-semibold',
+      width: '10%',
+      align: 'center',
     },
     {
       title: (
@@ -82,6 +84,8 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
       key: 'department',
       className: 'font-semibold',
       filters: departamentos,
+      width: '10%',
+      align: 'center',
       onFilter: (value: string, record: ServiceProps) =>
         record.department === value,
     },
@@ -94,6 +98,7 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
       dataIndex: 'local',
       key: 'local',
       className: 'font-semibold',
+      width: '10%',
     },
     {
       title: (
@@ -105,6 +110,7 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
       key: 'problem_description',
       className: 'font-semibold',
       ellipsis: true,
+      width: 'auto',
     },
     {
       title: (
@@ -125,6 +131,8 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
         );
       },
       filters: priorities,
+      width: '10%',
+      align: 'center',
       onFilter: (value: string, record: ServiceProps) =>
         record.priority === value,
     },
@@ -137,9 +145,12 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
       dataIndex: 'status',
       key: 'status',
       className: 'font-semibold',
+      width: '18%',
+      align: 'center',
     },
     {
       key: 'actions',
+      width: '10%',
       render: (record: ServiceProps) => (
         <div className="flex items-center justify-center gap-3">
           <Popconfirm
@@ -172,23 +183,23 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
   );
 
   return (
-    <section className="w-full">
+    <section className="w-full overflow-x-auto">
       {data.length > 0 ? (
         <>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-3">
             <Link
               to="/cadastrar-servico"
-              className="flex bg-[#000AFF] text-zinc-50 justify-center items-center py-2 w-40 rounded-lg text-sm gap-2 hover:bg-blue-700"
+              className="flex bg-[#000AFF] text-zinc-50 justify-center items-center py-2 w-full md:w-40 rounded-lg text-sm gap-2 hover:bg-blue-700"
             >
               <Plus className="size-4 text-white" />
               Novo serviço
             </Link>
 
-            <div className="flex text-sm p-2 bg-white rounded-lg border-[2px] gap-2">
+            <div className="flex text-sm p-2 bg-white rounded-lg border-[2px] gap-2 w-full md:w-auto">
               <Search className="size-5 text-zinc-400" />
               <input
                 type="text"
-                className="bg-none placeholder:text-zinc-400"
+                className="bg-none placeholder:text-zinc-400 w-full md:w-auto"
                 placeholder="Buscar serviço"
                 value={searchText}
                 onChange={handleSearch}
@@ -199,12 +210,13 @@ export const ServicesByUser: React.FC<ServicesByUserProps> = ({
             columns={columns}
             dataSource={filteredData}
             rowKey="id"
-            pagination={{ pageSize: 6 }}
+            pagination={{ pageSize: 6, position: ['bottomCenter'] }}
             className="bg-white rounded-xl mt-3"
+            scroll={{ x: true }}
           />
         </>
       ) : (
-        <p className="text-lg text-zinc-500">
+        <p className="text-center text-lg text-zinc-500">
           Ainda não a serviços solicitados.
         </p>
       )}

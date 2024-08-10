@@ -6,7 +6,9 @@ import { SignUp } from './pages/sign-up';
 
 import 'antd/locale/pt_BR';
 import 'react-datepicker/dist/react-datepicker.css';
+import Department from './pages/department';
 import Details from './pages/details';
+import Manage from './pages/manage';
 import RegisterService from './pages/register-service';
 
 export function App() {
@@ -19,6 +21,8 @@ export function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/cadastrar-servico" element={<RegisterService />} />
           <Route path="/servico/:serviceId" element={<Details />} />
+          <Route path="/dashboard/departamento" element={<Department />} />
+          <Route path="/gerenciar" element={<Manage />} />
         </Routes>
       </AuthProvider>
     </Router>

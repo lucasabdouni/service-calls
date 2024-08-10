@@ -1,0 +1,100 @@
+import { useContext, useEffect, useState } from 'react';
+
+import Layout from '../../components/layout';
+import Loading from '../../components/loading';
+import { Statistics } from '../../components/statistics';
+import { AuthContext } from '../../context/AuthContext';
+import { api } from '../../lib/axios';
+import { ServiceProps, ServicesTable } from './services-table';
+
+export default function Department() {
+  const { loading, user } = useContext(AuthContext);
+  const [serviceIsLoading, setServiceIsLoading] = useState(false);
+  const [serviceFilterIsLoading, setServiceFilterIsLoading] = useState(false);
+  const [service, setService] = useState<ServiceProps[]>([]);
+
+  async function handleDeleteService(id: string) {
+    try {
+      await api.delete(`/service/${id}`);
+      setService(service.filter((s) => s.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleFilteredServices(
+    startsDate: Date | null,
+    endsDate: Date | null,
+    checkedAccomplished: boolean,
+  ) {
+    try {
+      setServiceFilterIsLoading(true);
+      const queryParams = {
+        starts_at: startsDate ? startsDate.toISOString().slice(0, 10) : null,
+        ends_at: endsDate ? endsDate.toISOString().slice(0, 10) : null,
+        accomplished: checkedAccomplished,
+      };
+
+      const response = await api.get('/services', {
+        params: queryParams,
+      });
+      setService(response.data.services);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setServiceFilterIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    async function getServices() {
+      try {
+        if (!loading && user) {
+          setServiceIsLoading(true);
+          const response = await api.get(`/services`);
+          setService(response.data.services);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setServiceIsLoading(false);
+      }
+    }
+
+    getServices();
+  }, [loading, user]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  const requestsNumber = service.length;
+  const openRequest = service.filter(
+    (item) => item.accomplished === false,
+  ).length;
+  const completedRequest = service.filter(
+    (item) => item.accomplished === true,
+  ).length;
+
+  return (
+    <Layout>
+      {serviceIsLoading ? (
+        <Loading />
+      ) : (
+        <div className="w-full h-full max-w-6xl flex flex-col items-center justify-center gap-12 p-3">
+          <Statistics
+            openRequest={openRequest}
+            requests={requestsNumber}
+            completedRequest={completedRequest}
+          />
+          <ServicesTable
+            data={service}
+            handleDeleteService={handleDeleteService}
+            handleFilteredServices={handleFilteredServices}
+            serviceFilterIsLoading={serviceFilterIsLoading}
+          />
+        </div>
+      )}
+    </Layout>
+  );
+}
