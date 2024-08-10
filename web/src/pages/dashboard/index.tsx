@@ -1,13 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { Skeleton } from 'antd';
-import { Header } from '../../components/header';
+import Layout from '../../components/layout';
 import Loading from '../../components/loading';
-import { Menu } from '../../components/menu';
+import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
-import { ServiceProps, ServicesByUser } from './services-by-user';
-import { Statistics } from './statistics';
+import { ServiceProps, ServicesTable } from './services-user-table';
 
 export default function Dashboard() {
   const { loading, user } = useContext(AuthContext);
@@ -54,27 +53,22 @@ export default function Dashboard() {
   ).length;
 
   return (
-    <div className="w-full max-h-screen flex overflow-hidden">
-      <Menu />
-      <main className="w-full flex flex-col items-center justify-start">
-        <Header />
-
-        {serviceIsLoading ? (
-          <Skeleton active />
-        ) : (
-          <div className="w-full h-screen max-w-6xl flex flex-col items-center justify-center gap-12 p-3">
-            <Statistics
-              openRequest={openRequest}
-              requests={requestsNumber}
-              completedRequest={completedRequest}
-            />
-            <ServicesByUser
-              data={service}
-              handleDeleteService={handleDeleteService}
-            />
-          </div>
-        )}
-      </main>
-    </div>
+    <Layout>
+      {serviceIsLoading ? (
+        <Skeleton active />
+      ) : (
+        <div className="w-full h-full max-w-6xl flex flex-col items-center justify-center gap-12 p-3">
+          <Statistics
+            openRequest={openRequest}
+            requests={requestsNumber}
+            completedRequest={completedRequest}
+          />
+          <ServicesTable
+            data={service}
+            handleDeleteService={handleDeleteService}
+          />
+        </div>
+      )}
+    </Layout>
   );
 }
