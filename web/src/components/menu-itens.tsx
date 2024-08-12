@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 interface MenuItensProps {
   text: string;
@@ -18,8 +18,8 @@ export default function MenuItens({
 
   return (
     <li>
-      <a
-        href={routerName}
+      <Link
+        to={routerName}
         className={`flex items-center justify-center lg:justify-start gap-6 lg:border-l-[6px] border-l-[4px] px-7 py-5 ${
           isActivity
             ? ` border-indigo-100 bg-gray-600 text-gray-100`
@@ -36,7 +36,7 @@ export default function MenuItens({
         />
 
         <p className="hidden lg:block lg:pr-4">{text}</p>
-      </a>
+      </Link>
     </li>
   );
 }
