@@ -65,19 +65,19 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
     useState(false);
   const [searchText, setSearchText] = useState('');
 
-  const priorities = [...new Set(data.map((item) => item.priority))].map(
-    (priority) => ({
+  const priorities =
+    data &&
+    [...new Set(data.map((item) => item.priority))].map((priority) => ({
       text: priority,
       value: priority,
-    }),
-  );
+    }));
 
-  const departamentos = [...new Set(data.map((item) => item.department))].map(
-    (department) => ({
+  const departamentos =
+    data &&
+    [...new Set(data.map((item) => item.department))].map((department) => ({
       text: department,
       value: department,
-    }),
-  );
+    }));
 
   const columns = [
     {
@@ -194,15 +194,17 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
     setSearchText(e.target.value);
   };
 
-  const filteredData = data.filter((item) =>
-    Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchText.toLowerCase()),
-    ),
-  );
+  const filteredData =
+    data &&
+    data.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    );
 
   return (
     <section className="w-full">
-      {data.length > 0 ? (
+      {data && data.length > 0 ? (
         <>
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex gap-5 items-center">

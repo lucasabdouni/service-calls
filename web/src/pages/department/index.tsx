@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import Layout from '../../components/layout';
 import Loading from '../../components/loading';
 import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
@@ -68,16 +67,16 @@ export default function Department() {
     return <Loading />;
   }
 
-  const requestsNumber = service.length;
-  const openRequest = service.filter(
-    (item) => item.accomplished === false,
-  ).length;
-  const completedRequest = service.filter(
-    (item) => item.accomplished === true,
-  ).length;
+  const requestsNumber = service ? service.length : 0;
+  const openRequest = service
+    ? service.filter((item) => item.accomplished === false).length
+    : 0;
+  const completedRequest = service
+    ? service.filter((item) => item.accomplished === true).length
+    : 0;
 
   return (
-    <Layout>
+    <>
       {serviceIsLoading ? (
         <Loading />
       ) : (
@@ -95,6 +94,6 @@ export default function Department() {
           />
         </div>
       )}
-    </Layout>
+    </>
   );
 }

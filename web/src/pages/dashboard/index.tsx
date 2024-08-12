@@ -1,7 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { Skeleton } from 'antd';
-import Layout from '../../components/layout';
 import Loading from '../../components/loading';
 import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
@@ -53,9 +51,9 @@ export default function Dashboard() {
   ).length;
 
   return (
-    <Layout>
+    <>
       {serviceIsLoading ? (
-        <Skeleton active />
+        <Loading />
       ) : (
         <div className="w-full h-full max-w-6xl flex flex-col items-center justify-center gap-12 p-3">
           <Statistics
@@ -69,6 +67,6 @@ export default function Dashboard() {
           />
         </div>
       )}
-    </Layout>
+    </>
   );
 }

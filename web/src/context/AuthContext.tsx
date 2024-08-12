@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { ReactNode, createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Loading from '../components/loading';
 import { api } from '../lib/axios';
 
 interface User {
@@ -55,11 +54,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           navigate('/');
         }
       }
-      setLoading(false);
 
-      if (loading) {
-        <Loading />;
-      }
+      setLoading(false);
     };
 
     fetchData();

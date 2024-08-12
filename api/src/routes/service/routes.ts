@@ -30,13 +30,7 @@ export async function serviceRoutes(app: FastifyInstance) {
     },
     getServicesHandler,
   );
-  app
-    .withTypeProvider()
-    .get(
-      '/service/:serviceId',
-      { onRequest: [verifyJwt] },
-      getServicesByIdHandler,
-    );
+  app.withTypeProvider().get('/service/:serviceId', getServicesByIdHandler);
   app.withTypeProvider().put(
     '/service/:serviceId',
     {

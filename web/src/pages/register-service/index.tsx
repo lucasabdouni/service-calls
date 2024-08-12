@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
 import { ErrorMessage } from '../../components/error-message';
-import Layout from '../../components/layout';
 import { api } from '../../lib/axios';
 
 const serviceFormSchema = z.object({
@@ -48,7 +47,7 @@ export default function RegisterService() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="w-full h-full max-w-6xl flex flex-col items-center justify-center gap-12 p-3">
         <div className="w-full bg-white p-4 sm:p-16">
           <h1 className="text-2xl font-bold text-title">Nova requisição</h1>
@@ -185,6 +184,6 @@ export default function RegisterService() {
           </form>
         </div>
       </div>
-    </Layout>
+    </>
   );
 }

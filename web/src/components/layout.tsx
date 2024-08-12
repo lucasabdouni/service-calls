@@ -1,15 +1,19 @@
-import { ReactNode } from 'react';
+import { useContext } from 'react';
+import { Outlet } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { Header } from './header';
 import { Menu } from './menu';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout() {
+  const { isAuthenticated } = useContext(AuthContext);
+
   return (
     <div className="w-full flex">
       <Menu />
       <main className="w-full flex flex-col items-center justify-start">
-        <Header />
+        {isAuthenticated && <Header />}
 
-        {children}
+        <Outlet />
       </main>
     </div>
   );
