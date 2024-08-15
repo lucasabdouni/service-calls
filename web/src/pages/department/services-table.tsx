@@ -1,4 +1,5 @@
 import { Popconfirm, Table } from 'antd';
+import { ColumnType } from 'antd/lib/table';
 import { ptBR } from 'date-fns/locale';
 import {
   ArrowDown,
@@ -79,7 +80,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       value: department,
     }));
 
-  const columns = [
+  const columns: ColumnType<ServiceProps>[] = [
     {
       title: (
         <span className="flex text-xs items-center justify-center gap-2 text-zinc-500 font-light">
@@ -91,6 +92,9 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       className: 'font-semibold',
       width: '10%',
       align: 'center',
+      render: (text: string) => (
+        <span className="block truncate max-w-24">{text}</span>
+      ),
     },
     {
       title: (
@@ -104,8 +108,8 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       filters: departamentos,
       width: '10%',
       align: 'center',
-      onFilter: (value: string, record: ServiceProps) =>
-        record.department === value,
+      onFilter: (value, record: ServiceProps) =>
+        record.department === (value as string),
     },
     {
       title: (
@@ -116,7 +120,10 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       dataIndex: 'local',
       key: 'local',
       className: 'font-semibold',
-      width: '10%',
+      width: '12%',
+      render: (text: string) => (
+        <span className="block truncate max-w-28">{text}</span>
+      ),
     },
     {
       title: (
@@ -129,6 +136,9 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       className: 'font-semibold',
       ellipsis: true,
       width: 'auto',
+      render: (text: string) => (
+        <span className="block truncate max-w-60">{text}</span>
+      ),
     },
     {
       title: (
@@ -151,8 +161,8 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       filters: priorities,
       width: '10%',
       align: 'center',
-      onFilter: (value: string, record: ServiceProps) =>
-        record.priority === value,
+      onFilter: (value, record: ServiceProps) =>
+        record.priority === (value as string),
     },
     {
       title: (
@@ -163,12 +173,12 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       dataIndex: 'status',
       key: 'status',
       className: 'font-semibold',
-      width: '18%',
+      width: '20%',
       align: 'center',
     },
     {
       key: 'actions',
-      width: '10%',
+      width: '5%',
       render: (record: ServiceProps) => (
         <div className="flex items-center justify-center gap-3">
           <Popconfirm
