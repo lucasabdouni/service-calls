@@ -36,7 +36,7 @@ export default function Details() {
     try {
       await api.delete(`/service/${serviceId}`);
 
-      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O item foi removido com sucesso.' });
+      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O serviço foi deletado com sucesso.' });
 
       navigate('/dashboard');
     } catch (error) {

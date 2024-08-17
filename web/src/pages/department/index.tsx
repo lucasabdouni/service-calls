@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import Loading from '../../components/loading';
+import { notify } from '../../components/notification';
 import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
@@ -15,6 +16,9 @@ export default function Department() {
   async function handleDeleteService(id: string) {
     try {
       await api.delete(`/service/${id}`);
+
+      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O serviço foi deletado com sucesso.' });
+
       setService(service.filter((s) => s.id !== id));
     } catch (error) {
       console.log(error);
