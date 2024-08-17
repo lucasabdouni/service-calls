@@ -4,9 +4,10 @@ import { CalendarFold, X } from 'lucide-react';
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
-import { ErrorMessage } from '../../components/error-message';
+import { notify } from '../../components/notification';
 import { api } from '../../lib/axios';
 import { ServiceProps } from '../dashboard/services-user-table';
 
@@ -28,13 +29,14 @@ export function EditServiceModal({
   service,
   setService,
 }: CreateLinkModalProps) {
-  const [errorSubmitForm, setErrorSubmitForm] = useState('');
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     service.occurs_at || null,
   );
   const [selectedDepartment, setSelectedDepartment] = useState(
     service.department,
   );
+  const disabledButtonTransferDepartment = service.department === selectedDepartment
   const {
     register,
     handleSubmit,
@@ -46,6 +48,7 @@ export function EditServiceModal({
       responsible_accomplish: service.responsible_accomplish || '',
     },
   });
+
 
   async function handleUpdateService(data: ServiceFormData) {
     try {
@@ -59,9 +62,11 @@ export function EditServiceModal({
 
       setService(response.data.service);
 
+      notify({ type: 'success', message: 'Alterações realizadas com sucesso.', description: 'As mudanças foram aplicadas com sucesso.' });
+
       changeEditServiceModal();
     } catch (err) {
-      setErrorSubmitForm('Tente novamente mais tarde');
+       notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
     }
   }
 
@@ -73,9 +78,13 @@ export function EditServiceModal({
 
       setService(response.data.service);
 
+      notify({ type: 'success', message: 'Serviço direcionado para outro departamento.', description: 'As mudanças foram aplicadas com sucesso.' });
+
+      navigate('/dashboard/departamento');
+
       changeEditServiceModal();
     } catch (err) {
-      setErrorSubmitForm('Tente novamente mais tarde');
+       notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
     }
   }
 
@@ -97,7 +106,6 @@ export function EditServiceModal({
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleUpdateService)}
         >
-          {errorSubmitForm && <ErrorMessage message={errorSubmitForm} />}
 
           <label htmlFor="" className="font-semibold text-zinc-700">
             Status
@@ -181,7 +189,7 @@ export function EditServiceModal({
               <option value="TI">TI</option>
             </select>
 
-            <Button onClick={handleTransferDepartment} disabled={isSubmitting}>
+            <Button onClick={handleTransferDepartment} disabled={isSubmitting || disabledButtonTransferDepartment}>
               {isSubmitting ? (
                 <>
                   <svg

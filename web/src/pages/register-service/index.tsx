@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BadgeX } from 'lucide-react';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
-import { ErrorMessage } from '../../components/error-message';
+import { notify } from '../../components/notification';
 import { api } from '../../lib/axios';
 
 const serviceFormSchema = z.object({
@@ -24,7 +23,6 @@ type ServiceFormData = z.infer<typeof serviceFormSchema>;
 
 export default function RegisterService() {
   const navigate = useNavigate();
-  const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const {
     register,
     handleSubmit,
@@ -40,9 +38,12 @@ export default function RegisterService() {
     try {
       const response = await api.post('/service', data);
 
+      notify({ type: 'success', message: 'Serviço criado com sucesso.', description: 'A requisição de serviço foi cadastrada com sucesso.' });
+
       navigate(`/servico/${response.data.service.id}`);
     } catch (err) {
-      setErrorSubmitForm('Tente novamente mais tarde');
+      notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
+
     }
   }
 
@@ -56,7 +57,6 @@ export default function RegisterService() {
             className="flex flex-col gap-2 mt-8"
             onSubmit={handleSubmit(handleCreateService)}
           >
-            {errorSubmitForm && <ErrorMessage message={errorSubmitForm} />}
             <label htmlFor="" className="font-semibold text-zinc-700">
               Serviço
             </label>

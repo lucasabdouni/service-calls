@@ -1,13 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
-import { ErrorMessage } from '../../components/error-message';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/inputPassword';
+import { notify } from '../../components/notification';
 import { api } from '../../lib/axios';
 
 const registerFormSchema = z
@@ -37,7 +36,6 @@ type RegisterFormData = z.infer<typeof registerFormSchema>;
 
 export function SignUp() {
   const navigate = useNavigate();
-  const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const {
     register,
     handleSubmit,
@@ -68,6 +66,8 @@ export function SignUp() {
         password: data.password,
       });
 
+      notify({ type: 'success', message: 'Cadastro realizado com sucesso.', description: 'Sua conta foi criada com sucesso.' });
+
       navigate('/');
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -79,14 +79,12 @@ export function SignUp() {
           errorMessage &&
           specificErrorMessages[statusCode]?.[errorMessage]
         ) {
-          setErrorSubmitForm(specificErrorMessages[statusCode][errorMessage]);
+          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: specificErrorMessages[statusCode][errorMessage] });
         } else if (statusCode && generalErrorMessages[statusCode]) {
-          setErrorSubmitForm(generalErrorMessages[statusCode]);
+          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: generalErrorMessages[statusCode] });
         } else {
-          setErrorSubmitForm('Tente novamente mais tarde');
+          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: 'Houve um problema durante o cadastro. Tente novamente mais tarde.' });
         }
-      } else {
-        setErrorSubmitForm('Tente novamente mais tarde');
       }
     }
   }
@@ -106,7 +104,7 @@ export function SignUp() {
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleRegister)}
         >
-          {errorSubmitForm && <ErrorMessage message={errorSubmitForm} />}
+          
           <Input
             type="text"
             placeholder="Nome"

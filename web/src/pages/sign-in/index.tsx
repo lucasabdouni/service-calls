@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail } from 'lucide-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
-import { ErrorMessage } from '../../components/error-message';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/inputPassword';
+import { notify } from '../../components/notification';
 import { AuthContext } from '../../context/AuthContext';
 
 const loginFormSchema = z.object({
@@ -22,7 +22,6 @@ type LoginFormData = z.infer<typeof loginFormSchema>;
 export function SignIn() {
   const { signIn, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const {
     register,
     handleSubmit,
@@ -40,7 +39,7 @@ export function SignIn() {
   async function handleLogin(data: LoginFormData) {
     await signIn(data).then((error) => {
       if (error) {
-        setErrorSubmitForm(error);
+        notify({ type: 'error', message: 'Erro ao tentar fazer login.', description: error });
       }
     });
   }
@@ -60,7 +59,6 @@ export function SignIn() {
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleLogin)}
         >
-          {errorSubmitForm && <ErrorMessage message={errorSubmitForm} />}
 
           <Input
             type="email"

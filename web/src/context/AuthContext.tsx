@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { ReactNode, createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { notify } from '../components/notification';
 import { api } from '../lib/axios';
 
 interface User {
@@ -76,6 +77,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem('token', token);
 
       api.defaults.headers.Authorization = `Bearer ${token}`;
+
+      notify({ type: 'success', message: 'Login realizado com sucesso.', description: 'Bem-vindo de volta!' });
 
       const responseGetUser = await api.get('/me');
 

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '../../components/button';
-import { ErrorMessage } from '../../components/error-message';
+import { notify } from '../../components/notification';
 import { api } from '../../lib/axios';
 
 const filterUserFormSchema = z.object({
@@ -22,7 +22,6 @@ interface UserProps {
 }
 
 export default function Manage() {
-  const [errorSubmitForm, setErrorSubmitForm] = useState('');
   const [userSearch, setUserSearch] = useState<UserProps>();
   const [selectedRole, setSelectedRole] = useState(userSearch?.role);
   const [isSubmitingAlterRole, setIsSubmitingAlterRole] = useState(false);
@@ -36,7 +35,6 @@ export default function Manage() {
 
   async function handleFilterUser(data: filterUserFormData) {
     try {
-      setErrorSubmitForm('');
       const response = await api.get(`/user/${data.email}`);
 
       setUserSearch(response.data.user);
@@ -50,12 +48,10 @@ export default function Manage() {
           err.response?.status === 409 &&
           err.response?.data.message === 'User not found.'
         ) {
-          setErrorSubmitForm('Usuário não encontrado.');
-          setUserSearch(undefined);
+          notify({ type: 'error', message: 'Usuário não encontrado.', description: 'Verifique o nome de usuário e tente novamente.' });
         }
       } else {
-        setErrorSubmitForm('Ocorreu um erro. Por favor, tente novamente.');
-        setUserSearch(undefined);
+        notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
       }
     }
   }
@@ -63,17 +59,17 @@ export default function Manage() {
   async function handleUpdateUserRole() {
     try {
       setIsSubmitingAlterRole(true);
-      setErrorSubmitForm('');
       await api.put('/user/update-role', {
         email: userSearch?.email,
         role: selectedRole,
       });
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setErrorSubmitForm('Ocorreu um erro. Por favor, tente novamente.');
+        notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
       }
     } finally {
       setIsSubmitingAlterRole(false);
+      notify({ type: 'success', message: 'Alterações realizadas com sucesso.', description: 'As mudanças foram aplicadas com sucesso.' });
     }
   }
 
@@ -93,7 +89,7 @@ export default function Manage() {
             className="flex flex-col gap-2 mt-8"
             onSubmit={handleSubmit(handleFilterUser)}
           >
-            {errorSubmitForm && <ErrorMessage message={errorSubmitForm} />}
+     
             <label htmlFor="email" className="font-semibold text-zinc-700">
               Email
             </label>

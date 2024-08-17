@@ -7,6 +7,7 @@ import { CheckCheck, SquarePen, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tv } from 'tailwind-variants';
 import Loading from '../../components/loading';
+import { notify } from '../../components/notification';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
 import { ServiceProps } from '../dashboard/services-user-table';
@@ -35,9 +36,11 @@ export default function Details() {
     try {
       await api.delete(`/service/${serviceId}`);
 
+      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O item foi removido com sucesso.' });
+
       navigate('/dashboard');
     } catch (error) {
-      console.log(error);
+      notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
     }
   }
 
@@ -45,9 +48,11 @@ export default function Details() {
     try {
       await api.get(`/accomplished/${serviceId}`);
 
+      notify({ type: 'success', message: 'Alterações salvas com sucesso.', description: 'As mudanças foram aplicadas com sucesso.' });
+
       navigate('/dashboard');
     } catch (error) {
-      console.log(error);
+      notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
     }
   }
 
