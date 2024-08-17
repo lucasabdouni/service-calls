@@ -214,8 +214,6 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
 
   return (
     <section className="w-full">
-      {data && data.length > 0 ? (
-        <>
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex gap-5 items-center">
               <div className="flex flex-col gap-4 items-center sm:flex-row">
@@ -309,6 +307,9 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
               />
             </div>
           </div>
+
+      {data && data.length > 0 ? (
+        <>
           <Table
             columns={columns}
             dataSource={filteredData}
@@ -319,8 +320,8 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
           />
         </>
       ) : (
-        <p className="text-center text-lg text-zinc-500">
-          Não a serviços solicitados.
+        <p className="text-center text-lg text-zinc-500 mt-28">
+          Não ha serviços solicitados nesse periodo.
         </p>
       )}
     </section>
