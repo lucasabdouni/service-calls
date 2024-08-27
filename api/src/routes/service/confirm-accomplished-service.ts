@@ -1,10 +1,10 @@
 import { ClientError } from '@/errors/client-erro';
+import { getDepartmentById } from '@/repositories/department-respository';
 import {
   confirmAccomplisheService,
   getServiceById,
 } from '@/repositories/service-repository';
 import { Role } from '@/repositories/user-repository';
-import { CheckDepartmentFromRoles } from '@/utils/check-department';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 
@@ -19,26 +19,24 @@ export const confirmAccomplishedServiceHandler = async (
 ) => {
   const { serviceId } = paramsSchema.parse(request.params);
   const { role } = request.user;
+  const userId = request.user.sub;
 
   const checkServiceExists = await getServiceById(serviceId);
   if (!checkServiceExists) {
     throw new ClientError(409, 'Service not found.');
   }
 
-  const departmentCheck = CheckDepartmentFromRoles(role);
-  if (role !== Role.ADMIN) {
-    throw new ClientError(
-      409,
-      'User not authorized to update this department.',
-    );
-  }
+  const departmentCheck = await getDepartmentById(
+    checkServiceExists.department.id,
+  );
 
-  if (
-    role !== Role.ADMIN &&
-    checkServiceExists.department !== departmentCheck
-  ) {
+  const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
+    (item) => item.id === userId,
+  );
+
+  if (role !== Role.ADMIN && !checkUserIsResponsibleDepartment) {
     throw new ClientError(
-      409,
+      403,
       'User not authorized to update this department.',
     );
   }

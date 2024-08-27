@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,23 +10,34 @@ datasource db {
 }
 
 model User {
-  id                  String    @id @default(uuid())
-  name                String
-  email               String    @unique
-  password_hash       String
-  registration_number Int       @unique
-  department          String
-  ramal               Int
-  role                String    @default("MEMBER")
-  created_at          DateTime  @default(now())
-  services            Service[]
+  id                      String       @id @default(uuid())
+  name                    String
+  email                   String       @unique
+  password_hash           String
+  registration_number     Int          @unique
+  department              String
+  ramal                   Int
+  role                    String       @default("MEMBER")
+  created_at              DateTime     @default(now())
+  services                Service[]
+  departments_responsible Department[] @relation("UserDepartmentsResponsible")
 
   @@map("users")
 }
 
+model Department {
+  id           String    @id @default(uuid())
+  name         String
+  sigla        String
+  created_at   DateTime  @default(now())
+  responsables User[]    @relation("UserDepartmentsResponsible")
+  services     Service[]
+
+  @@map("departments")
+}
+
 model Service {
   id                     String    @id @default(uuid())
-  department             String
   local                  String
   problem                String
   problem_description    String
@@ -37,8 +47,12 @@ model Service {
   status                 String    @default("Aguardando atendimento")
   accomplished           Boolean   @default(false)
   created_at             DateTime  @default(now())
-  user_id                String
-  user                   User      @relation(fields: [user_id], references: [id])
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  department_id String
+  department    Department @relation(fields: [department_id], references: [id])
 
   @@map("services")
 }

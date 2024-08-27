@@ -1,5 +1,5 @@
 import { ClientError } from '@/errors/client-erro';
-import { findUserByEmail } from '@/repositories/user-repository';
+import { findUserByEmailAuth } from '@/repositories/user-repository';
 import { compare } from 'bcryptjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import z from 'zod';
@@ -19,7 +19,7 @@ export const authenticateUserHandler = async (
 ) => {
   const { email, password } = bodySchema.parse(request.body);
 
-  const user = await findUserByEmail(email);
+  const user = await findUserByEmailAuth(email);
 
   if (!user) throw new ClientError(401, 'Invalid credentials');
 

@@ -6,6 +6,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { getUserByIdHandler } from './get-user';
 import { getServicesByUserEmailHandler } from './get-user-by-email';
 import { registerUserHandler } from './register-user';
+import { updateUserResponsibilitiesDepartmentHandler } from './update-user-responsibles-department';
 import { updateUserRolesHandler } from './update-user-roles';
 
 export async function userRoutes(app: FastifyInstance) {
@@ -20,11 +21,20 @@ export async function userRoutes(app: FastifyInstance) {
       { onRequest: [verifyJwt, verifyUserRole(Role.ADMIN)] },
       updateUserRolesHandler,
     );
+
   app
     .withTypeProvider()
     .get(
       '/user/:userEmail',
       { onRequest: [verifyJwt, verifyUserRole(Role.ADMIN)] },
       getServicesByUserEmailHandler,
+    );
+
+  app
+    .withTypeProvider()
+    .put(
+      '/user/:id/update-departments-responsable',
+      { onRequest: [verifyJwt, verifyUserRole(Role.ADMIN)] },
+      updateUserResponsibilitiesDepartmentHandler,
     );
 }

@@ -8,6 +8,7 @@ import { deleteServiceHandler } from './delete-service';
 import { getServicesHandler } from './get-services';
 import { getServicesByIdHandler } from './get-services-by-id';
 import { getServicesByUserIdHandler } from './get-services-by-user-id';
+import { transferDepartmentServiceHandler } from './transfer-department-service';
 import { updateServiceHandler } from './update-service';
 
 export async function serviceRoutes(app: FastifyInstance) {
@@ -17,36 +18,28 @@ export async function serviceRoutes(app: FastifyInstance) {
   app.withTypeProvider().get(
     '/services',
     {
-      onRequest: [
-        verifyJwt,
-        verifyUserRole(
-          Role.ADMIN,
-          Role.ELECTRICAL_RESPONSIBLE,
-          Role.MECANIC_RESPONSIBLE,
-          Role.SG_RESPONSIBLE,
-          Role.TI_RESPONSIBLE,
-        ),
-      ],
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
     },
     getServicesHandler,
   );
   app.withTypeProvider().get('/service/:serviceId', getServicesByIdHandler);
+
   app.withTypeProvider().put(
     '/service/:serviceId',
     {
-      onRequest: [
-        verifyJwt,
-        verifyUserRole(
-          Role.ADMIN,
-          Role.ELECTRICAL_RESPONSIBLE,
-          Role.MECANIC_RESPONSIBLE,
-          Role.SG_RESPONSIBLE,
-          Role.TI_RESPONSIBLE,
-        ),
-      ],
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
     },
     updateServiceHandler,
   );
+
+  app.withTypeProvider().put(
+    '/transfer-service-department/:serviceId',
+    {
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+    },
+    transferDepartmentServiceHandler,
+  );
+
   app.withTypeProvider().get(
     '/services/user/:userId',
     {
@@ -64,16 +57,7 @@ export async function serviceRoutes(app: FastifyInstance) {
   app.withTypeProvider().get(
     '/accomplished/:serviceId',
     {
-      onRequest: [
-        verifyJwt,
-        verifyUserRole(
-          Role.ADMIN,
-          Role.ELECTRICAL_RESPONSIBLE,
-          Role.MECANIC_RESPONSIBLE,
-          Role.SG_RESPONSIBLE,
-          Role.TI_RESPONSIBLE,
-        ),
-      ],
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
     },
     confirmAccomplishedServiceHandler,
   );

@@ -1,9 +1,5 @@
 import { ClientError } from '@/errors/client-erro';
-import {
-  getServices,
-  getServicesInDateRange,
-} from '@/repositories/service-repository';
-import { CheckDepartmentFromRoles } from '@/utils/check-department';
+import { getServices } from '@/repositories/service-repository';
 import dayjs from 'dayjs';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
@@ -25,32 +21,24 @@ export const getServicesHandler = async (request: FastifyRequest) => {
   const { starts_at, ends_at, accomplished } = paramsSchema.parse(
     request.query,
   );
-  const { role } = request.user;
-  let services = [];
 
-  const startDate = dayjs(starts_at).startOf('day').toDate();
-  const endDate = dayjs(ends_at)
-    .startOf('day')
-    .set('hour', 23)
-    .set('minute', 59)
-    .toDate();
+  const userId = request.user.sub;
+
+  const startDate = starts_at ? dayjs(starts_at).startOf('day').toDate() : null;
+  const endDate = ends_at
+    ? dayjs(ends_at).startOf('day').set('hour', 23).set('minute', 59).toDate()
+    : null;
 
   if (starts_at && dayjs(startDate).isAfter(endDate)) {
     throw new ClientError(401, 'Invalid date');
   }
 
-  const department = CheckDepartmentFromRoles(role);
-
-  if (starts_at && ends_at) {
-    services = await getServicesInDateRange({
-      startDate,
-      endDate,
-      department,
-      accomplished,
-    });
-  } else {
-    services = await getServices({ department, accomplished });
-  }
+  const services = await getServices({
+    userId,
+    accomplished,
+    startDate,
+    endDate,
+  });
 
   if (services.length < 1) {
     return 'No services registered in the selected data';

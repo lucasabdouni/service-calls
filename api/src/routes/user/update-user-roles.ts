@@ -7,14 +7,7 @@ import {
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 
-const RoleEnumSchema = z.enum([
-  Role.ADMIN,
-  Role.ELECTRICAL_RESPONSIBLE,
-  Role.MECANIC_RESPONSIBLE,
-  Role.MEMBER,
-  Role.SG_RESPONSIBLE,
-  Role.TI_RESPONSIBLE,
-]);
+const RoleEnumSchema = z.enum([Role.ADMIN, Role.RESPONSIBLE, Role.MEMBER]);
 
 const bodySchema = z.object({
   email: z

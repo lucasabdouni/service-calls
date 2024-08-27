@@ -13,8 +13,6 @@ const paramsSchema = z.object({
 export const getServicesByUserIdHandler = async (request: FastifyRequest) => {
   const { userId } = paramsSchema.parse(request.params);
 
-  console.log(userId);
-
   const user = await getUserById(userId);
   if (!user) throw new ClientError(409, 'User not found.');
 

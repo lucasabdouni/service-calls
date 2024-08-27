@@ -1,10 +1,10 @@
 import { ClientError } from '@/errors/client-erro';
+import { getDepartmentById } from '@/repositories/department-respository';
 import {
   deleteService,
   getServiceById,
 } from '@/repositories/service-repository';
-import { Role, getUserById } from '@/repositories/user-repository';
-import { CheckDepartmentFromRoles } from '@/utils/check-department';
+import { Role } from '@/repositories/user-repository';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 
@@ -15,30 +15,26 @@ const paramsSchema = z.object({
 });
 
 export const deleteServiceHandler = async (request: FastifyRequest) => {
-  console.log(request.params);
   const { serviceId } = paramsSchema.parse(request.params);
-
-  const user = await getUserById(request.user.sub);
-  if (!user) throw new ClientError(409, 'user not found.');
+  const { role } = request.user;
+  const userId = request.user.sub;
 
   const checkServiceExists = await getServiceById(serviceId);
-  if (!checkServiceExists) throw new ClientError(409, 'service not found.');
-
-  const departmentCheck = CheckDepartmentFromRoles(request.user.role);
-
-  if (user.role !== Role.ADMIN) {
-    throw new ClientError(
-      409,
-      'User not authorized to update this department.',
-    );
+  if (!checkServiceExists) {
+    throw new ClientError(409, 'Service not found.');
   }
 
-  if (
-    (user.role !== Role.ADMIN && user.department !== departmentCheck) ||
-    user.id !== checkServiceExists.user_id
-  ) {
+  const departmentCheck = await getDepartmentById(
+    checkServiceExists.department.id,
+  );
+
+  const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
+    (item) => item.id === userId,
+  );
+
+  if (role !== Role.ADMIN && !checkUserIsResponsibleDepartment) {
     throw new ClientError(
-      409,
+      403,
       'User not authorized to update this department.',
     );
   }
