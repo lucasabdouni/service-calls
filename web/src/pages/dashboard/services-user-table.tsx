@@ -10,21 +10,7 @@ import {
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { tv } from 'tailwind-variants';
-
-export interface ServiceProps {
-  id: string;
-  department: string;
-  local: string;
-  problem: string;
-  problem_description: string;
-  priority: string;
-  status: string;
-  occurs_at?: Date | null;
-  responsible_accomplish?: string | null;
-  accomplished: boolean;
-  created_at: string;
-  user_id: string;
-}
+import { ServiceProps } from '../../types/services';
 
 interface ServicesByUserProps {
   data: ServiceProps[];
@@ -55,12 +41,12 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
     }),
   );
 
-  const departamentos = [...new Set(data.map((item) => item.department))].map(
-    (department) => ({
-      text: department,
-      value: department,
-    }),
-  );
+  const departamentos = [
+    ...new Set(data.map((item) => item.department.name)),
+  ].map((department) => ({
+    text: department,
+    value: department,
+  }));
 
   const columns: ColumnType<ServiceProps>[] = [
     {
@@ -85,13 +71,17 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
         </span>
       ),
       dataIndex: 'department',
-      key: 'department',
+      key: 'department.name',
       className: 'font-semibold',
       filters: departamentos,
       width: '10%',
-      align: 'center',
       onFilter: (value, record: ServiceProps) =>
-        record.department === (value as string),
+        record.department.name === (value as string),
+      render: (_, record) => (
+        <span className="block truncate max-w-24">
+          {record.department.name}
+        </span>
+      ),
     },
     {
       title: (

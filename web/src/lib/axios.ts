@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { redirect } from 'react-router-dom';
 
 const token = localStorage.getItem('token');
 
@@ -17,7 +18,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (error.response?.data.code === 'token.expired') {
         localStorage.removeItem('token');
-        window.location.href = '/';
+        redirect('/');
       }
     }
     return Promise.reject(error);

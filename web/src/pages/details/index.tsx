@@ -10,11 +10,11 @@ import Loading from '../../components/loading';
 import { notify } from '../../components/notification';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
-import { ServiceProps } from '../dashboard/services-user-table';
+import { ServiceProps } from '../../types/services';
 import { EditServiceModal } from './edit-service-modal';
 
 const priorityVariants = tv({
-  base: 'text-3xl',
+  base: 'text-xl sm:text-3xl',
   variants: {
     priority: {
       Baixa: 'text-green-500',
@@ -36,11 +36,20 @@ export default function Details() {
     try {
       await api.delete(`/service/${serviceId}`);
 
-      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O serviço foi deletado com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Deletado com sucesso.',
+        description: 'O serviço foi deletado com sucesso.',
+      });
 
       navigate('/dashboard');
     } catch (error) {
-      notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
+      notify({
+        type: 'error',
+        message: 'Erro na solicitação.',
+        description:
+          'Houve um problema durante a solicitação. Tente novamente mais tarde.',
+      });
     }
   }
 
@@ -48,11 +57,20 @@ export default function Details() {
     try {
       await api.get(`/accomplished/${serviceId}`);
 
-      notify({ type: 'success', message: 'Alterações salvas com sucesso.', description: 'As mudanças foram aplicadas com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Alterações salvas com sucesso.',
+        description: 'As mudanças foram aplicadas com sucesso.',
+      });
 
       navigate('/dashboard');
     } catch (error) {
-      notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
+      notify({
+        type: 'error',
+        message: 'Erro na solicitação.',
+        description:
+          'Houve um problema durante a solicitação. Tente novamente mais tarde.',
+      });
     }
   }
 
@@ -76,7 +94,7 @@ export default function Details() {
     }
 
     getServices();
-  }, [loading, user, serviceId]);
+  }, [loading, user, serviceId, navigate]);
 
   if (loading) {
     return <Loading />;
@@ -85,7 +103,9 @@ export default function Details() {
   const userAuthorizedToEdit =
     (isAuthenticated &&
       service?.department &&
-      user.role.includes(service.department)) ||
+      user.departments_responsible.some(
+        (item) => item.id === service.department.id,
+      )) ||
     user.role === 'ADMIN';
 
   const serviceTeminated = service?.status === 'Finalizado' ? true : false;
@@ -112,7 +132,7 @@ export default function Details() {
             <div className="flex flex-col justify-between sm:flex-row gap-4">
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-gray-500">Serviço</p>
-                <h2 className="text-4xl font-semibold">
+                <h2 className="font-semibold text-2xl sm:text-4xl max-w-full break-words">
                   {service?.problem.toUpperCase()}
                 </h2>
               </div>
@@ -131,23 +151,31 @@ export default function Details() {
 
             <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">Descrição</p>
-              <span className="text-2xl">{service?.problem_description}</span>
+              <span className="text-base sm:text-2xl max-w-full break-words">
+                {service?.problem_description}
+              </span>
             </div>
 
             <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">Departamento responsável</p>
-              <span className="text-2xl">{service?.department}</span>
+              <span className="text-lg sm:text-2xl max-w-full break-words">
+                {service?.department.sigla} - {service?.department.name}
+              </span>
             </div>
 
             <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">Local</p>
-              <span className="text-2xl">{service?.local}</span>
+              <span className="text-lg sm:text-2xl max-w-full break-words">
+                {service?.local}
+              </span>
             </div>
 
             <div className="flex flex-col justify-start sm:items-center sm:flex-row gap-4 sm:gap-8">
               <div className="flex flex-col gap-2">
                 <p className="text-sm text-gray-500">Status</p>
-                <span className="text-2xl">{service?.status}</span>
+                <span className="text-lg sm:text-2xl max-w-full break-words">
+                  {service?.status}
+                </span>
               </div>
 
               <div className="h-10 w-[1px] bg-gray-300 hidden sm:block" />
@@ -155,7 +183,9 @@ export default function Details() {
               <div>
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-gray-500">Data de solicitação</p>
-                  <span className="text-2xl">{dateCreate}</span>
+                  <span className="text-lg sm:text-2xl max-w-full break-words">
+                    {dateCreate}
+                  </span>
                 </div>
               </div>
             </div>
@@ -165,7 +195,7 @@ export default function Details() {
                 <p className="text-sm text-gray-500">
                   Data prevista para execução
                 </p>
-                <span className="text-2xl">
+                <span className="text-lg sm:text-2xl max-w-full break-words">
                   {dateOccurs ? dateOccurs : '-- / -- / --'}
                 </span>
               </div>
@@ -176,7 +206,7 @@ export default function Details() {
                 <p className="text-sm text-gray-500">
                   Responsavel pela execução
                 </p>
-                <span className="text-2xl">
+                <span className="text-lg sm:text-2xl max-w-full break-words">
                   {service?.responsible_accomplish
                     ? service.responsible_accomplish
                     : 'Não definido'}
@@ -185,7 +215,7 @@ export default function Details() {
             </div>
 
             {userAuthorizedToEdit && (
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex flex-col mt-4 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   className="flex items-center justify-center gap-2 bg-orange-500 p-2 text-zinc-100 hover:bg-orange-700 disabled:bg-orange-300"
                   disabled={serviceTeminated}
@@ -195,21 +225,7 @@ export default function Details() {
                   Responder a solicitação
                 </button>
 
-                <div className="flex gap-2">
-                  <Popconfirm
-                    title="Tem certeza que deseja deletar?"
-                    onConfirm={() => handleDeleteService()}
-                    okText="Sim"
-                    cancelText="Não"
-                  >
-                    <button
-                      className="flex items-center justify-center gap-2 bg-red-500 p-2 text-zinc-100 hover:bg-red-700 disabled:bg-red-400"
-                      disabled={serviceTeminated}
-                    >
-                      <Trash2 className="size-4" /> Deletar
-                    </button>
-                  </Popconfirm>
-
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <Popconfirm
                     title="Você tem certeza que o serviço foi realizado?"
                     onConfirm={handleConfirmAccomplishedService}
@@ -217,11 +233,25 @@ export default function Details() {
                     cancelText="Não"
                   >
                     <button
-                      className="flex items-center justify-center gap-2 bg-green-400 p-2 text-zinc-100 hover:bg-green-600 disabled:bg-green-300"
+                      className="flex w-full items-center justify-center gap-2 bg-green-400 p-2 text-zinc-100 hover:bg-green-600 disabled:bg-green-300"
                       disabled={serviceTeminated}
                     >
                       <CheckCheck />
                       Realizado
+                    </button>
+                  </Popconfirm>
+
+                  <Popconfirm
+                    title="Tem certeza que deseja deletar?"
+                    onConfirm={() => handleDeleteService()}
+                    okText="Sim"
+                    cancelText="Não"
+                  >
+                    <button
+                      className="flex w-full items-center justify-center gap-2 bg-red-500 p-2 text-zinc-100 hover:bg-red-700 disabled:bg-red-400"
+                      disabled={serviceTeminated}
+                    >
+                      <Trash2 className="size-4" /> Deletar
                     </button>
                   </Popconfirm>
                 </div>

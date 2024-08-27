@@ -3,16 +3,7 @@ import { ReactNode, createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { notify } from '../components/notification';
 import { api } from '../lib/axios';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  registration_number: number;
-  department: string;
-  ramal: number;
-  role: string;
-}
+import { UserProps } from '../types/user';
 
 interface SignInCredentials {
   email: string;
@@ -22,7 +13,7 @@ interface SignInCredentials {
 interface AuthContextData {
   signIn: (credentials: SignInCredentials) => Promise<void | string>;
   signOut: () => Promise<void>;
-  user: User;
+  user: UserProps;
   loading: boolean;
   isAuthenticated: boolean;
 }
@@ -34,7 +25,7 @@ type AuthProviderProps = {
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User>({} as User);
+  const [user, setUser] = useState<UserProps>({} as UserProps);
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!user.id;
   const navigate = useNavigate();
@@ -50,7 +41,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const response = await api.get('/me');
           setUser(response.data.user);
         } catch (error) {
-          setUser({} as User);
+          setUser({} as UserProps);
           localStorage.removeItem('token');
           navigate('/');
         }
@@ -78,7 +69,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       api.defaults.headers.Authorization = `Bearer ${token}`;
 
-      notify({ type: 'success', message: 'Login realizado com sucesso.', description: 'Bem-vindo de volta!' });
+      notify({
+        type: 'success',
+        message: 'Login realizado com sucesso.',
+        description: 'Bem-vindo de volta!',
+      });
 
       const responseGetUser = await api.get('/me');
 
@@ -101,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signOut() {
     try {
-      setUser({} as User);
+      setUser({} as UserProps);
       localStorage.removeItem('token');
       navigate('/');
     } catch (error) {

@@ -1,4 +1,4 @@
-import { FileText, Folders, ListPlus, User } from 'lucide-react';
+import { ClipboardList, FileText, Folders, ListPlus, User } from 'lucide-react';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import MenuItens from './menu-itens';
@@ -39,8 +39,8 @@ export function Menu() {
             )}
             {isADMIN && (
               <MenuItens
-                icon={Folders}
-                text="Gerenciar"
+                icon={ClipboardList}
+                text="Admin"
                 routerName="/gerenciar"
               />
             )}

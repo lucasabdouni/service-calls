@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ptBR } from 'date-fns/locale';
 import { CalendarFold, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,8 @@ import { z } from 'zod';
 import { Button } from '../../components/button';
 import { notify } from '../../components/notification';
 import { api } from '../../lib/axios';
-import { ServiceProps } from '../dashboard/services-user-table';
+import { DepartmentProps } from '../../types/department';
+import { ServiceProps } from '../../types/services';
 
 interface CreateLinkModalProps {
   changeEditServiceModal: () => void;
@@ -30,13 +31,18 @@ export function EditServiceModal({
   setService,
 }: CreateLinkModalProps) {
   const navigate = useNavigate();
+
+  const [departments, setDepartments] = useState<DepartmentProps[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     service.occurs_at || null,
   );
+
   const [selectedDepartment, setSelectedDepartment] = useState(
-    service.department,
+    service.department.id ?? '',
   );
-  const disabledButtonTransferDepartment = service.department === selectedDepartment
+  const disabledButtonTransferDepartment =
+    service.department.id === selectedDepartment;
   const {
     register,
     handleSubmit,
@@ -49,6 +55,20 @@ export function EditServiceModal({
     },
   });
 
+  useEffect(() => {
+    async function getDepartments() {
+      try {
+        const response = await api.get(`/departments`);
+        setDepartments(response.data.departments);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getDepartments();
+  }, []);
 
   async function handleUpdateService(data: ServiceFormData) {
     try {
@@ -62,29 +82,50 @@ export function EditServiceModal({
 
       setService(response.data.service);
 
-      notify({ type: 'success', message: 'Alterações realizadas com sucesso.', description: 'As mudanças foram aplicadas com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Alterações realizadas com sucesso.',
+        description: 'As mudanças foram aplicadas com sucesso.',
+      });
 
       changeEditServiceModal();
     } catch (err) {
-       notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
+      notify({
+        type: 'error',
+        message: 'Erro na solicitação.',
+        description:
+          'Houve um problema durante a solicitação. Tente novamente mais tarde.',
+      });
     }
   }
 
   async function handleTransferDepartment() {
     try {
-      const response = await api.put(`/service/${service?.id}`, {
-        selectedDepartment,
-      });
+      const response = await api.put(
+        `/transfer-service-department/${service?.id}`,
+        {
+          department_id: selectedDepartment,
+        },
+      );
 
       setService(response.data.service);
 
-      notify({ type: 'success', message: 'Serviço direcionado para outro departamento.', description: 'As mudanças foram aplicadas com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Serviço direcionado para outro departamento.',
+        description: 'As mudanças foram aplicadas com sucesso.',
+      });
 
       navigate('/dashboard/departamento');
 
       changeEditServiceModal();
     } catch (err) {
-       notify({ type: 'error', message: 'Erro na solicitação.', description: 'Houve um problema durante a solicitação. Tente novamente mais tarde.' });
+      notify({
+        type: 'error',
+        message: 'Erro na solicitação.',
+        description:
+          'Houve um problema durante a solicitação. Tente novamente mais tarde.',
+      });
     }
   }
 
@@ -106,7 +147,6 @@ export function EditServiceModal({
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleUpdateService)}
         >
-
           <label htmlFor="" className="font-semibold text-zinc-700">
             Status
           </label>
@@ -180,16 +220,32 @@ export function EditServiceModal({
             <label htmlFor="" className="font-semibold text-zinc-700">
               Departamento
             </label>
+
             <select
               id="department"
               value={selectedDepartment}
               onChange={(event) => setSelectedDepartment(event.target.value)}
-              className="w-32 p-2"
+              className="w-max"
+              disabled={loading}
             >
-              <option value="TI">TI</option>
+              <option className="flex" value="" disabled>
+                {loading ? 'Carregando...' : 'Selecione'}
+              </option>
+
+              {departments &&
+                departments.map((department) => {
+                  return (
+                    <option key={department.id} value={department.id}>
+                      {department.sigla} - {department.name}
+                    </option>
+                  );
+                })}
             </select>
 
-            <Button onClick={handleTransferDepartment} disabled={isSubmitting || disabledButtonTransferDepartment}>
+            <Button
+              onClick={handleTransferDepartment}
+              disabled={isSubmitting || disabledButtonTransferDepartment}
+            >
               {isSubmitting ? (
                 <>
                   <svg

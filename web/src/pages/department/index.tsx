@@ -5,7 +5,8 @@ import { notify } from '../../components/notification';
 import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
-import { ServiceProps, ServicesTable } from './services-table';
+import { ServiceProps } from '../../types/services';
+import { ServicesTable } from './services-table';
 
 export default function Department() {
   const { loading, user } = useContext(AuthContext);
@@ -17,7 +18,11 @@ export default function Department() {
     try {
       await api.delete(`/service/${id}`);
 
-      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O serviço foi deletado com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Deletado com sucesso.',
+        description: 'O serviço foi deletado com sucesso.',
+      });
 
       setService(service.filter((s) => s.id !== id));
     } catch (error) {

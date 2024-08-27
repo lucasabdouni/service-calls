@@ -5,20 +5,25 @@ import { notify } from '../../components/notification';
 import { Statistics } from '../../components/statistics';
 import { AuthContext } from '../../context/AuthContext';
 import { api } from '../../lib/axios';
-import { ServiceProps, ServicesTable } from './services-user-table';
+import { ServiceProps } from '../../types/services';
+import { ServicesTable } from './services-user-table';
 
 export default function Dashboard() {
   const { loading, user } = useContext(AuthContext);
   const [serviceIsLoading, setServiceIsLoading] = useState(false);
-  const [service, setService] = useState<ServiceProps[]>([]);
+  const [services, setServices] = useState<ServiceProps[]>([]);
 
   async function handleDeleteService(id: string) {
     try {
       await api.delete(`/service/${id}`);
 
-      notify({ type: 'success', message: 'Deletado com sucesso.', description: 'O serviço foi deletado com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Deletado com sucesso.',
+        description: 'O serviço foi deletado com sucesso.',
+      });
 
-      setService(service.filter((s) => s.id !== id));
+      setServices(services.filter((s) => s.id !== id));
     } catch (error) {
       console.log(error);
     }
@@ -30,7 +35,8 @@ export default function Dashboard() {
         if (!loading && user) {
           setServiceIsLoading(true);
           const response = await api.get(`/services/user/${user.id}`);
-          setService(response.data.services);
+          setServices(response.data.services);
+          console.log(services);
         }
       } catch (error) {
         console.log(error);
@@ -46,11 +52,11 @@ export default function Dashboard() {
     return <Loading />;
   }
 
-  const requestsNumber = service.length;
-  const openRequest = service.filter(
+  const requestsNumber = services.length;
+  const openRequest = services.filter(
     (item) => item.accomplished === false,
   ).length;
-  const completedRequest = service.filter(
+  const completedRequest = services.filter(
     (item) => item.accomplished === true,
   ).length;
 
@@ -66,7 +72,7 @@ export default function Dashboard() {
             completedRequest={completedRequest}
           />
           <ServicesTable
-            data={service}
+            data={services}
             handleDeleteService={handleDeleteService}
           />
         </div>
