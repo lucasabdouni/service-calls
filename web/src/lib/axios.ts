@@ -4,7 +4,7 @@ import { redirect } from 'react-router-dom';
 const token = localStorage.getItem('token');
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3333',
+  baseURL: 'https://service-calls.onrender.com',
   headers: {
     Authorization: `Bearer ${token}`,
   },
