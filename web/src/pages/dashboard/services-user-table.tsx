@@ -217,7 +217,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
         </>
       ) : (
         <p className="text-center text-lg text-zinc-500">
-          Ainda não a serviços solicitados.
+          Ainda não há serviços solicitados.
         </p>
       )}
     </section>

@@ -311,7 +311,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
         </>
       ) : (
         <p className="text-center text-lg text-zinc-500 mt-28">
-          Não ha serviços solicitados nesse periodo.
+          Não há serviços solicitados.
         </p>
       )}
     </section>
