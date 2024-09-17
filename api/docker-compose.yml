@@ -1,0 +1,12 @@
+version: '1'
+
+services:
+  database:
+    container_name: apiservicecall
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: apiservicecall
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
