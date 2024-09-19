@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
-import { Role, getUserById } from './user-repository';
+import { Role, findUserById } from './user-repository';
 
 type serviceProps = {
   local: string;
@@ -26,7 +26,7 @@ export async function createService(data: serviceProps) {
   return service;
 }
 
-export async function getServices({
+export async function findServices({
   userId,
   accomplished,
   startDate,
@@ -41,7 +41,7 @@ export async function getServices({
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(today.getDate() - 30);
 
-  const user = await getUserById(userId);
+  const user = await findUserById(userId);
 
   const where = {
     accomplished,
@@ -112,7 +112,7 @@ export async function getServices({
 //   return services;
 // }
 
-export async function getServiceById(id: string) {
+export async function findService(id: string) {
   const service = await prisma.service.findUnique({
     where: { id },
     select: {
@@ -142,7 +142,7 @@ export async function getServiceById(id: string) {
   return service;
 }
 
-export async function getServiceByUserId(id: string) {
+export async function findServicesByUserId(id: string) {
   const service = await prisma.service.findMany({
     where: { user_id: id },
     select: {

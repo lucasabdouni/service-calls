@@ -3,10 +3,10 @@ import fastifyJwt from '@fastify/jwt';
 import fastify from 'fastify';
 import { env } from './env';
 import { errorHandler } from './error-handler';
-import { authenticateRoutes } from './routes/authenticate/routes';
-import { departmentRoutes } from './routes/department/routes';
-import { serviceRoutes } from './routes/service/routes';
-import { userRoutes } from './routes/user/routes';
+import { authenticateRoutes } from './http/routes/authenticate';
+import { departmentRoutes } from './http/routes/department';
+import { serviceRoutes } from './http/routes/service';
+import { userRoutes } from './http/routes/user';
 
 export const app = fastify();
 
@@ -27,4 +27,3 @@ app.register(authenticateRoutes);
 app.register(userRoutes);
 app.register(serviceRoutes);
 app.register(departmentRoutes);
-

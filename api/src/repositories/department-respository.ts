@@ -10,13 +10,13 @@ export async function createDepartment(data: Prisma.DepartmentCreateInput) {
   return department;
 }
 
-export async function getDepartment() {
+export async function findDepartments() {
   const departments = await prisma.department.findMany();
 
   return departments;
 }
 
-export async function getDepartmentById(id: string) {
+export async function findDepartment(id: string) {
   const department = await prisma.department.findUnique({
     where: {
       id: id,

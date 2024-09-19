@@ -60,7 +60,7 @@ export async function createUser(data: Prisma.UserCreateInput) {
   return user;
 }
 
-export async function getUserById(id: string) {
+export async function findUserById(id: string) {
   const user = await prisma.user.findUnique({
     where: { id },
     select: {
@@ -97,7 +97,7 @@ export async function updateUserRoles(email: string, role: Role) {
   return user;
 }
 
-export async function getUserResponsable(role: Role) {
+export async function findUserResponsable(role: Role) {
   const users = await prisma.user.findMany({
     where: { role },
     select: {
