@@ -1,5 +1,5 @@
 import { Role } from '@/repositories/user-repository';
-import { UpdateUserRoleUseCase } from '@/use-cases/update-user-role';
+import { UpdateUserRoleUseCase } from '@/use-cases/user/update-user-role';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 

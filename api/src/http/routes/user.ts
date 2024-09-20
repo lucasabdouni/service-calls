@@ -6,6 +6,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { updateUserRoleHandler } from '../controllers/user//update-user-role';
 import { getUserByIdHandler } from '../controllers/user/get-user';
 import { getServicesByUserEmailHandler } from '../controllers/user/get-user-by-email';
+import { getUserMetricsHandler } from '../controllers/user/get-user-metrics';
 import { registerHandler } from '../controllers/user/register';
 import { updateUserResponsibilitiesDepartmentHandler } from '../controllers/user/update-user-responsibles-department';
 
@@ -28,6 +29,14 @@ export async function userRoutes(app: FastifyInstance) {
       '/user/:userEmail',
       { onRequest: [verifyJwt, verifyUserRole(Role.ADMIN)] },
       getServicesByUserEmailHandler,
+    );
+
+  app
+    .withTypeProvider()
+    .get(
+      '/user-metrics/:userId',
+      { onRequest: [verifyJwt] },
+      getUserMetricsHandler,
     );
 
   app

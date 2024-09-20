@@ -1,4 +1,4 @@
-import { UpdateDepartmentReponsibilitiesUseCase } from '@/use-cases/update-responsibles-department';
+import { UpdateDepartmentReponsibilitiesUseCase } from '@/use-cases/department/update-responsibles-department';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 

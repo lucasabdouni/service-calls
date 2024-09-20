@@ -1,4 +1,4 @@
-import { GetServiceUseCase } from '@/use-cases/get-service';
+import { GetServiceUseCase } from '@/use-cases/service/get-service';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 
@@ -8,7 +8,7 @@ const paramsSchema = z.object({
     .uuid({ message: 'Id is invalid' }),
 });
 
-export const getService = async (request: FastifyRequest) => {
+export const getServiceHandler = async (request: FastifyRequest) => {
   const { serviceId } = paramsSchema.parse(request.params);
 
   const { service } = await GetServiceUseCase({ serviceId });

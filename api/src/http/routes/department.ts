@@ -23,7 +23,7 @@ export async function departmentRoutes(app: FastifyInstance) {
     .get('/departments', { onRequest: [verifyJwt] }, getDepartmentsHandler);
 
   app.withTypeProvider().get(
-    '/department/:id',
+    '/department/:departmentId',
     {
       onRequest: [verifyJwt],
     },

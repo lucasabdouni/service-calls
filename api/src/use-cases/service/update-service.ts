@@ -3,37 +3,34 @@ import { findDepartment } from '@/repositories/department-respository';
 import { findService, updateService } from '@/repositories/service-repository';
 import { Role } from '@/repositories/user-repository';
 
-interface UpdateServiceProps {
-  local?: string;
-  problem?: string;
-  problemDescription?: string;
-  occurs_at?: Date;
-  priority?: string;
-  responsible_accomplish?: string;
-  status?: string;
-}
-
 interface UpdateServiceRequest {
-  data: UpdateServiceProps;
   serviceId: string;
+  name?: string;
+  description?: string;
+  executionTime?: number;
   userId: string;
   role: string;
 }
 
 export async function UpdateServiceUseCase({
-  data,
   serviceId,
+  name,
+  description,
+  executionTime,
   userId,
   role,
 }: UpdateServiceRequest) {
-  const checkServiceExists = await findService(serviceId);
-  if (!checkServiceExists) {
+  const serviceCheck = await findService(serviceId);
+
+  if (!serviceCheck) {
     throw new ClientError(409, 'Service not found.');
   }
 
-  const departmentCheck = await findDepartment(
-    checkServiceExists.department.id,
-  );
+  const departmentCheck = await findDepartment(serviceCheck.department_id);
+
+  if (!departmentCheck) {
+    throw new ClientError(409, 'Department not found.');
+  }
 
   const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
     (item) => item.id === userId,
@@ -46,7 +43,10 @@ export async function UpdateServiceUseCase({
     );
   }
 
-  const service = await updateService({ id: serviceId, data });
+  const service = await updateService({
+    id: serviceId,
+    data: { name, description, execution_time: executionTime },
+  });
 
   return { service };
 }

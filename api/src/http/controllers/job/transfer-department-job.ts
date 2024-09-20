@@ -1,6 +1,6 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
-import { TransferDepartmentServiceUseCase } from '@/use-cases/transfer-department-service';
+import { TransferDepartmentJobUseCase } from '@/use-cases/job/transfer-department-job';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
@@ -12,23 +12,21 @@ const bodySchema = z.object({
 });
 
 const paramsSchema = z.object({
-  serviceId: z
+  jobId: z
     .string({ message: 'Id is invalid' })
     .uuid({ message: 'Id is invalid' }),
 });
 
-export const transferDepartmentServiceHandler = async (
-  request: FastifyRequest,
-) => {
+export const transferDepartmentJobHandler = async (request: FastifyRequest) => {
   const { departmentId } = bodySchema.parse(request.body);
-  const { serviceId } = paramsSchema.parse(request.params);
+  const { jobId } = paramsSchema.parse(request.params);
 
   const { role } = request.user;
   const userId = request.user.sub;
 
-  const { service, departmentDetails, requesterServiceEmail } =
-    await TransferDepartmentServiceUseCase({
-      serviceId,
+  const { job, departmentDetails, requesterJobEmail } =
+    await TransferDepartmentJobUseCase({
+      jobId,
       departmentId,
       userId,
       role,
@@ -38,7 +36,7 @@ export const transferDepartmentServiceHandler = async (
 
   await Promise.all(
     departmentDetails.responsables.map(async (responsable) => {
-      const serviceLink = `${env.WEB_URL}/servico/${service.id}`;
+      const jobLink = `${env.WEB_URL}/servico/${job.id}`;
 
       const message = await mail.sendMail({
         from: {
@@ -46,28 +44,31 @@ export const transferDepartmentServiceHandler = async (
           address: 'no-reply@cinbal.com.br',
         },
         to: responsable.email,
-        subject: `Requisição de serviço direcionada: ${service.problem}`,
+        subject: `Requisição de serviço direcionada: `,
         html: `
               <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
-                <p>Olá, recebemos uma nova requição de serviço: <strong>${service.problem}</strong></p>
+                <p>Olá, recebemos uma nova requição de serviço: </strong></p>
+                <p></p>
+                <p>Sua solicitação foi transferida para o departamento:</p>
+                <p>${job.department.name}</p>
                 <p></p>
                 <p>Descrição do do serviço:</p>
                 <p></p>
-                <p>${service.problem_description}</p>
-                <p>Local: ${service.local}</p>
+                <p>${job.problem_description}</p>
+                <p>Local: ${job.local}</p>
                 <p>
-                  <a href="${serviceLink}">Visualizar</a>
+                  <a href="${jobLink}">Visualizar</a>
                 </p>
                 <p></p>
                 <p>Caso você não saiba do que se trata esse e-mail, apenas ignore esse e-mail.</p>
               </div>
             `.trim(),
-        bcc: [requesterServiceEmail],
+        bcc: [requesterJobEmail],
       });
 
       console.log(nodemailer.getTestMessageUrl(message));
     }),
   );
 
-  return { service: service };
+  return { job: job };
 };

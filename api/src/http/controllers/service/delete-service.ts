@@ -1,4 +1,4 @@
-import { DeleteServiceUseCase } from '@/use-cases/delete-service';
+import { DeleteServiceUseCase } from '@/use-cases/service/delete-service';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 
@@ -10,10 +10,8 @@ const paramsSchema = z.object({
 
 export const deleteServiceHandler = async (request: FastifyRequest) => {
   const { serviceId } = paramsSchema.parse(request.params);
-  const { role } = request.user;
-  const userId = request.user.sub;
 
-  await DeleteServiceUseCase({ serviceId, userId, role });
+  await DeleteServiceUseCase({ serviceId });
 
   return true;
 };

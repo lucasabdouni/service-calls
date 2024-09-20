@@ -1,4 +1,4 @@
-import { DeleteDeparmentUseCase } from '@/use-cases/delete-department';
+import { DeleteDeparmentUseCase } from '@/use-cases/department/delete-department';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 

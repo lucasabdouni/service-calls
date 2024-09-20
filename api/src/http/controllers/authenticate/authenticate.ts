@@ -1,4 +1,4 @@
-import { AuthenticateUseCase } from '@/use-cases/authenticate';
+import { AuthenticateUseCase } from '@/use-cases/authenticate/authenticate';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import z from 'zod';
 

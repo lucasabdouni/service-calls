@@ -1,29 +1,29 @@
 import { ClientError } from '@/errors/client-erro';
 import { findDepartment } from '@/repositories/department-respository';
-import { createService } from '@/repositories/service-repository';
+import { createJob } from '@/repositories/job-repository';
 
-interface CreateServiceRequest {
+interface CreateJobRequest {
   local: string;
-  problem: string;
   departmentId: string;
   problemDescription: string;
   priority: string;
   userId: string;
+  serviceId?: string;
 }
 
-export async function CreateServiceUseCase(data: CreateServiceRequest) {
+export async function CreateJobUseCase(data: CreateJobRequest) {
   const departmentDetails = await findDepartment(data.departmentId);
 
   if (!departmentDetails) throw new ClientError(409, 'Department not found.');
 
-  const service = await createService({
+  const job = await createJob({
     local: data.local,
     department_id: data.departmentId,
     problem_description: data.problemDescription,
     priority: data.priority,
-    problem: data.problem,
     user_id: data.userId,
+    service_id: data.serviceId,
   });
 
-  return { service, departmentDetails };
+  return { job, departmentDetails };
 }

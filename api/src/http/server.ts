@@ -7,5 +7,6 @@ app
     port: env.PORT,
   })
   .then(() => {
+    app.cron.startAllJobs();
     console.log('🚀 HTTP Server Running!');
   });

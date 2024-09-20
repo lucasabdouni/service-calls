@@ -1,4 +1,4 @@
-import { GetUserUseCase } from '@/use-cases/get-user';
+import { GetUserUseCase } from '@/use-cases/user/get-user';
 import { FastifyRequest } from 'fastify';
 
 export const getUserByIdHandler = async (request: FastifyRequest) => {

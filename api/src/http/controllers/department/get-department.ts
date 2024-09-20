@@ -1,4 +1,4 @@
-import { GetDepartmentUseCase } from '@/use-cases/get-department';
+import { GetDepartmentUseCase } from '@/use-cases/department/get-department';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 

@@ -1,29 +1,30 @@
 import { ClientError } from '@/errors/client-erro';
 import { findDepartment } from '@/repositories/department-respository';
 import {
-  deleteService,
-  findServiceById,
-} from '@/repositories/service-repository';
+  confirmAccomplisheJob,
+  findJobById,
+} from '@/repositories/job-repository';
 import { Role } from '@/repositories/user-repository';
 
-interface DeleteServiceRequest {
-  serviceId: string;
+interface ConfirmAccomplishedJobRequest {
+  jobId: string;
   userId: string;
   role: string;
 }
 
-export async function DeleteServiceUseCase({
-  serviceId,
+export async function ConfirmAccomplishedJobUseCase({
+  jobId,
   userId,
   role,
-}: DeleteServiceRequest) {
-  const checkServiceExists = await findServiceById(serviceId);
-  if (!checkServiceExists) {
-    throw new ClientError(409, 'Service not found.');
+}: ConfirmAccomplishedJobRequest) {
+  const checkRequestExists = await findJobById(jobId);
+
+  if (!checkRequestExists) {
+    throw new ClientError(409, 'Request not found.');
   }
 
   const departmentCheck = await findDepartment(
-    checkServiceExists.department.id,
+    checkRequestExists.department.id,
   );
 
   const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
@@ -37,5 +38,13 @@ export async function DeleteServiceUseCase({
     );
   }
 
-  await deleteService(checkServiceExists.id);
+  const job = await confirmAccomplisheJob({
+    id: jobId,
+    data: {
+      accomplished: true,
+      status: 'Finalizado',
+    },
+  });
+
+  return { job };
 }

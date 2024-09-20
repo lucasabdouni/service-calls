@@ -1,4 +1,4 @@
-import { UpdateDepartmentUseCase } from '@/use-cases/update-department';
+import { UpdateDepartmentUseCase } from '@/use-cases/department/update-department';
 
 import { FastifyRequest } from 'fastify';
 import z from 'zod';

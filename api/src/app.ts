@@ -1,17 +1,40 @@
 import cors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import fastify from 'fastify';
+import fastifyCron from 'fastify-cron';
 import { env } from './env';
 import { errorHandler } from './error-handler';
 import { authenticateRoutes } from './http/routes/authenticate';
 import { departmentRoutes } from './http/routes/department';
+import { jobRoutes } from './http/routes/job';
 import { serviceRoutes } from './http/routes/service';
 import { userRoutes } from './http/routes/user';
+import { pauseJobServices } from './jobs/taskHandlers/pauseJobServices';
+import { resumeJobServices } from './jobs/taskHandlers/resumeJobServices';
 
 export const app = fastify();
 
 app.register(cors, {
   origin: '*',
+});
+
+app.register(fastifyCron, {
+  jobs: [
+    {
+      name: 'pauseJobsServices',
+      cronTime: '30 17 * * 1-5',
+      onTick: async () => {
+        await pauseJobServices();
+      },
+    },
+    {
+      name: 'resumeJobsServices',
+      cronTime: '30 7 * * 1-5',
+      onTick: async () => {
+        await resumeJobServices();
+      },
+    },
+  ],
 });
 
 app.register(fastifyJwt, {
@@ -25,5 +48,6 @@ app.setErrorHandler(errorHandler);
 
 app.register(authenticateRoutes);
 app.register(userRoutes);
-app.register(serviceRoutes);
+app.register(jobRoutes);
 app.register(departmentRoutes);
+app.register(serviceRoutes);

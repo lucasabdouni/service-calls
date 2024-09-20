@@ -1,4 +1,4 @@
-import { GetUserByEmailUseCase } from '@/use-cases/get-user-by-email';
+import { GetUserByEmailUseCase } from '@/use-cases/user/get-user-by-email';
 import { FastifyRequest } from 'fastify';
 import z from 'zod';
 

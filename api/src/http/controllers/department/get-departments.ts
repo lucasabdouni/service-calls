@@ -1,4 +1,4 @@
-import { GetDepartmentsUseCase } from '@/use-cases/get-departments';
+import { GetDepartmentsUseCase } from '@/use-cases/department/get-departments';
 
 export const getDepartmentsHandler = async () => {
   const { departments } = await GetDepartmentsUseCase();
