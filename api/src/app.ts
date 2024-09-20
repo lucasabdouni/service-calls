@@ -1,5 +1,6 @@
 import cors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
+import fastifyWebsocket from '@fastify/websocket';
 import fastify from 'fastify';
 import fastifyCron from 'fastify-cron';
 import { env } from './env';
@@ -11,6 +12,7 @@ import { serviceRoutes } from './http/routes/service';
 import { userRoutes } from './http/routes/user';
 import { pauseJobServices } from './jobs/taskHandlers/pauseJobServices';
 import { resumeJobServices } from './jobs/taskHandlers/resumeJobServices';
+import { initializeSocket } from './websocket/socketManager';
 
 export const app = fastify();
 
@@ -44,6 +46,8 @@ app.register(fastifyJwt, {
   },
 });
 
+app.register(fastifyWebsocket);
+
 app.setErrorHandler(errorHandler);
 
 app.register(authenticateRoutes);
@@ -51,3 +55,4 @@ app.register(userRoutes);
 app.register(jobRoutes);
 app.register(departmentRoutes);
 app.register(serviceRoutes);
+app.register(initializeSocket);
