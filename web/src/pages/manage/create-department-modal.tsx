@@ -1,10 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { createDepartment } from '../../api/create-department';
+import { getDepartmentsResponse } from '../../api/get-departments';
 import { Button } from '../../components/button';
 import { notify } from '../../components/notification';
-import { api } from '../../lib/axios';
+import { DepartmentProps } from '../../types/department';
 
 interface CreateLinkModalProps {
   changeDepartmentModal: () => void;
@@ -33,9 +36,38 @@ export function CreateDepartmentModal({
     resolver: zodResolver(createDepartmentFormSchema),
   });
 
+  const queryClient = useQueryClient();
+
+  function updateDepartmentsOnCache(department: DepartmentProps) {
+    const departmentsCache = queryClient.getQueryData<getDepartmentsResponse>([
+      'departments',
+    ]);
+
+    if (!departmentsCache) {
+      return;
+    }
+
+    const updatedDepartments = {
+      ...departmentsCache,
+      departments: [...departmentsCache, department],
+    };
+
+    queryClient.setQueryData<getDepartmentsResponse>(
+      ['departments'],
+      updatedDepartments,
+    );
+  }
+
+  const { mutateAsync: createDepartmentFn } = useMutation({
+    mutationFn: createDepartment,
+    onSuccess: (data) => {
+      updateDepartmentsOnCache(data);
+    },
+  });
+
   async function handleCreateDepartment(data: DepartmentFormData) {
     try {
-      await api.post('/department', data);
+      await createDepartmentFn(data);
 
       notify({
         type: 'success',

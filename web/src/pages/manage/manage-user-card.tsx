@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { BadgeX } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { updateUserRole, UpdateUserRoleBody } from '../../api/update-user-role';
 import { Button } from '../../components/button';
 import { notify } from '../../components/notification';
 import Spin from '../../components/spin';
@@ -39,14 +41,18 @@ export default function ManageUserCard() {
     );
   }
 
+  const { mutateAsync: updateUserRoleFn } = useMutation({
+    mutationFn: updateUserRole,
+  });
+
   async function handleFilterUser(data: filterUserFormData) {
     try {
       const response = await api.get(`/user/${data.email}`);
 
-      setUserSearch(response.data.user);
+      setUserSearch(response.data);
 
-      if (response.data.user) {
-        setSelectedRole(response.data.user.role);
+      if (response.data) {
+        setSelectedRole(response.data.role);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -57,7 +63,7 @@ export default function ManageUserCard() {
           notify({
             type: 'error',
             message: 'Usuário não encontrado.',
-            description: 'Verifique o nome de usuário e tente novamente.',
+            description: 'Verifique o email do usuário e tente novamente.',
           });
         }
       } else {
@@ -81,10 +87,10 @@ export default function ManageUserCard() {
 
       setIsSubmitingAlterRole(true);
 
-      await api.put('/user/update-role', {
+      await updateUserRoleFn({
         email: userSearch?.email,
         role: selectedRole,
-      });
+      } as UpdateUserRoleBody);
 
       setUserSearch((prevUser) => {
         if (!prevUser) return prevUser;

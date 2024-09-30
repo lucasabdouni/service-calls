@@ -1,13 +1,21 @@
 import { useState } from 'react';
 import { Button } from '../../components/button';
-import { CreateDepartmentModal } from './manage-department-modal';
+import { CreateDepartmentModal } from './create-department-modal';
+import { EditDepartmentModal } from './edit-department-modal';
 
 export default function ManageDeparmentCard() {
   const [isCreateDepartmentModalOpen, setIsCreateDepartmentModalOpen] =
     useState(false);
 
-  function changeDepartmentModal() {
+  const [isEditDepartmentModalOpen, setIsEditDepartmentModalOpen] =
+    useState(false);
+
+  function changeCreateDepartmentModal() {
     setIsCreateDepartmentModalOpen(!isCreateDepartmentModalOpen);
+  }
+
+  function changeEditDepartmentModal() {
+    setIsEditDepartmentModalOpen(!isEditDepartmentModalOpen);
   }
 
   return (
@@ -21,13 +29,35 @@ export default function ManageDeparmentCard() {
           Criar, editar e excluir.
         </p>
 
-        <Button type="button" onClick={changeDepartmentModal} className="mt-4">
+        <Button
+          type="button"
+          onClick={changeCreateDepartmentModal}
+          className="mt-4"
+        >
           Criar departamento
+        </Button>
+
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={changeEditDepartmentModal}
+          className="mt-4"
+        >
+          Editar departamento
         </Button>
       </div>
 
       {isCreateDepartmentModalOpen && (
-        <CreateDepartmentModal changeDepartmentModal={changeDepartmentModal} />
+        <CreateDepartmentModal
+          changeDepartmentModal={changeCreateDepartmentModal}
+        />
+      )}
+
+      {isEditDepartmentModalOpen && (
+        <EditDepartmentModal
+          isOpen={isEditDepartmentModalOpen}
+          changeDepartmentModal={changeEditDepartmentModal}
+        />
       )}
     </>
   );

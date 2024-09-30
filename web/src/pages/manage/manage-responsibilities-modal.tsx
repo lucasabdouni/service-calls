@@ -1,7 +1,9 @@
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { CircleX, SendHorizontal, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { getDepartments } from '../../api/get-departments';
+import { updateDepartmentsUserResponsable } from '../../api/update-deparments-user-reponsable';
 import { notify } from '../../components/notification';
-import { api } from '../../lib/axios';
 import { DepartmentProps } from '../../types/department';
 import { UserProps } from '../../types/user';
 
@@ -16,46 +18,47 @@ export function ManageResponsibilitiesModal({
   userSearch,
   setUserSearch,
 }: CreateLinkModalProps) {
-  const [departments, setDepartments] = useState<DepartmentProps[]>([]);
   const [userDepartments, setUserDepartments] = useState<DepartmentProps[]>(
     userSearch.departments_responsible,
   );
+  const [departmentsDisponible, setDepartmentsDisponible] = useState<
+    DepartmentProps[]
+  >([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
   const [addDepartmentsIds, setAddDepartmentsIds] = useState<string[]>([]);
   const [removeDepartmentsIds, setRemoveDepartmentsIds] = useState<string[]>(
     [],
   );
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function getDepartments() {
-      try {
-        const response = await api.get(`/departments`);
+  async function getDepartmentsFn() {
+    const departments = await getDepartments();
 
-        const deparments = response.data?.departments.filter(
-          (department: DepartmentProps) =>
-            !userSearch.departments_responsible.some(
-              (existingDept) => existingDept.id === department.id,
-            ),
-        );
+    const departmentFilter = departments.filter(
+      (department: DepartmentProps) =>
+        !userSearch.departments_responsible.some(
+          (existingDept) => existingDept.id === department.id,
+        ),
+    );
 
-        setDepartments(deparments);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    }
+    setDepartmentsDisponible(departmentFilter);
+  }
 
-    getDepartments();
-  }, [userSearch.departments_responsible]);
+  const { isLoading: isLoadingDepartments } = useQuery({
+    queryKey: ['departments'],
+    queryFn: getDepartmentsFn,
+    staleTime: 1000 * 60,
+  });
+
+  const { mutateAsync: updateResponsibilitesUserFn } = useMutation({
+    mutationFn: updateDepartmentsUserResponsable,
+  });
 
   function handleAddDepartmentsIds() {
     setAddDepartmentsIds([...addDepartmentsIds, selectedDepartmentId]);
 
-    const newDepartment = departments.find(
-      (item) => item.id === selectedDepartmentId,
-    );
+    const newDepartment =
+      departmentsDisponible &&
+      departmentsDisponible.find((item) => item.id === selectedDepartmentId);
 
     if (
       newDepartment &&
@@ -63,11 +66,11 @@ export function ManageResponsibilitiesModal({
     ) {
       setUserDepartments([...userDepartments, newDepartment]);
 
-      const departmentList = departments.filter(
+      const departmentList = departmentsDisponible.filter(
         (department: DepartmentProps) => department.id !== newDepartment.id,
       );
 
-      setDepartments(departmentList);
+      setDepartmentsDisponible(departmentList);
 
       if (removeDepartmentsIds.some((item) => item === newDepartment.id)) {
         setRemoveDepartmentsIds(
@@ -83,7 +86,7 @@ export function ManageResponsibilitiesModal({
       userDepartments.filter((department) => department.id !== dept.id),
     );
 
-    setDepartments([...departments, dept]);
+    setDepartmentsDisponible([...departmentsDisponible, dept]);
 
     if (addDepartmentsIds.some((item) => item === dept.id)) {
       setAddDepartmentsIds(
@@ -94,9 +97,10 @@ export function ManageResponsibilitiesModal({
 
   async function handleUpdateResponsibilitesUser() {
     try {
-      await api.put(`/user/${userSearch.id}/update-departments-responsable`, {
+      await updateResponsibilitesUserFn({
         addDepartmentsIds,
         removeDepartmentsIds,
+        userId: userSearch.id,
       });
 
       notify({
@@ -176,16 +180,16 @@ export function ManageResponsibilitiesModal({
             <select
               id="department"
               className="w-max flex-1 bg-gray-200 px-2 hover:bg-gray-300"
-              disabled={loading}
+              disabled={isLoadingDepartments}
               onChange={(e) => setSelectedDepartmentId(e.target.value)}
               value={selectedDepartmentId}
             >
               <option className="flex" value="" disabled>
-                {loading ? 'Carregando...' : 'Selecione'}
+                {isLoadingDepartments ? 'Carregando...' : 'Selecione'}
               </option>
 
-              {departments &&
-                departments.map((department) => {
+              {departmentsDisponible &&
+                departmentsDisponible.map((department) => {
                   return (
                     <option key={department.id} value={department.id}>
                       {department.sigla} - {department.name}
