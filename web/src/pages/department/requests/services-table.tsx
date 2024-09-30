@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Popconfirm, Table } from 'antd';
 import { ColumnType } from 'antd/lib/table';
 import { ptBR } from 'date-fns/locale';
@@ -10,20 +11,16 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { tv } from 'tailwind-variants';
-import { ServiceProps } from '../../types/services';
-
-interface ServicesByUserProps {
-  data: ServiceProps[];
-  handleDeleteService: (id: string) => void;
-  handleFilteredServices: (
-    startsDate: Date | null,
-    endsDate: Date | null,
-    checkedAccomplished: boolean,
-  ) => void;
-  serviceFilterIsLoading: boolean;
-}
+import { deleteJob } from '../../../api/delete-job';
+import {
+  getUserResponsableJobs,
+  GetUserResponsableJobsResponse,
+} from '../../../api/get-user-responsable-job';
+import { notify } from '../../../components/notification';
+import { Skeleton } from '../../../components/skeleton';
+import { ExportJobsMetrics } from './jobs-metrics';
 
 const priorityVariants = tv({
   base: 'font-semibold',
@@ -36,12 +33,14 @@ const priorityVariants = tv({
   },
 });
 
-export const ServicesTable: React.FC<ServicesByUserProps> = ({
-  data,
-  handleDeleteService,
-  handleFilteredServices,
-  serviceFilterIsLoading = false,
-}) => {
+export function ServicesTable() {
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const starts_at = searchParams.get('starts_at');
+  const ends_at = searchParams.get('ends_at');
+  const accomplished = searchParams.get('accomplished') === 'true';
+
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
     null,
     null,
@@ -52,36 +51,131 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
     useState(false);
   const [searchText, setSearchText] = useState('');
 
+  const { data: jobs, isLoading: isLoadingJobs } = useQuery({
+    queryKey: ['user-reponsable-jobs', starts_at, ends_at, accomplished],
+    queryFn: () =>
+      getUserResponsableJobs({
+        starts_at,
+        ends_at,
+        accomplished,
+      }),
+    retry: false,
+  });
+
   const priorities =
-    data &&
-    [...new Set(data.map((item) => item.priority))].map((priority) => ({
+    jobs &&
+    [...new Set(jobs.map((item) => item.priority))].map((priority) => ({
       text: priority,
       value: priority,
     }));
 
+  const responsable =
+    jobs &&
+    [
+      ...new Set(
+        jobs
+          .map((item) => item.responsable?.name)
+          .filter((name): name is string => !!name),
+      ),
+    ].map((name) => ({
+      text: name,
+      value: name,
+    }));
+
   const departamentos =
-    data &&
-    [...new Set(data.map((item) => item.department.name))].map(
+    jobs &&
+    [...new Set(jobs.map((item) => item.department.name))].map(
       (department) => ({
         text: department,
         value: department,
       }),
     );
 
-  const columns: ColumnType<ServiceProps>[] = [
+  const servicos =
+    jobs &&
+    [...new Set(jobs.map((item) => item.service.name))].map((department) => ({
+      text: department,
+      value: department,
+    }));
+
+  function handleFilteredServices() {
+    setSearchParams((state) => {
+      if (startDate && endDate) {
+        state.set('starts_at', startDate.toISOString().slice(0, 10));
+        state.set('ends_at', endDate.toISOString().slice(0, 10));
+      } else {
+        state.delete('starts_at');
+        state.delete('ends_at');
+      }
+
+      if (checkedServiceAccomplished) {
+        state.set('accomplished', 'true');
+      } else {
+        state.delete('accomplished');
+      }
+
+      return state;
+    });
+  }
+
+  function updateUserJobsOnCache(jobId: string) {
+    const jobsUserListCache =
+      queryClient.getQueriesData<GetUserResponsableJobsResponse>({
+        queryKey: ['user-reponsable-jobs'],
+      });
+
+    jobsUserListCache.forEach(([cacheKey, cacheData]) => {
+      if (!cacheData) {
+        return;
+      }
+
+      const updateJobs = cacheData.filter((job) => job.id !== jobId);
+
+      queryClient.setQueryData<GetUserResponsableJobsResponse>(
+        cacheKey,
+        updateJobs,
+      );
+
+      return updateJobs;
+    });
+  }
+
+  const { mutateAsync: deleteJobFn } = useMutation({
+    mutationFn: deleteJob,
+    onSuccess: (_, { jobId }) => {
+      updateUserJobsOnCache(jobId);
+    },
+  });
+
+  function handleDeleteJob(jobId: string) {
+    deleteJobFn({ jobId });
+
+    notify({
+      type: 'success',
+      message: 'Deletado com sucesso.',
+      description: 'O serviço foi deletado com sucesso.',
+    });
+  }
+
+  const columns: ColumnType<GetUserResponsableJobsResponse[number]>[] = [
     {
       title: (
         <span className="flex text-xs items-center justify-center gap-2 text-zinc-500 font-light">
           Serviço <ArrowDown className="size-4 text-zinc-400" />
         </span>
       ),
-      dataIndex: 'problem',
-      key: 'problem',
+      dataIndex: ['service', 'name'],
+      key: 'service.name',
       className: 'font-semibold',
+      filters: servicos,
       width: '10%',
       align: 'center',
+      onFilter: (value, record: GetUserResponsableJobsResponse[number]) =>
+        record.service.name === (value as string),
       render: (text: string) => (
-        <span className="block truncate max-w-24">{text}</span>
+        <span className="block truncate max-w-24">
+          {text ? text : 'Não definido'}
+        </span>
       ),
     },
     {
@@ -90,13 +184,13 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
           Departamento <ArrowDown className="size-4 text-zinc-400" />
         </span>
       ),
-      dataIndex: 'department',
-      key: 'department',
+      dataIndex: ['department', 'name'],
+      key: 'department.name',
       className: 'font-semibold',
       filters: departamentos,
       width: '10%',
       align: 'center',
-      onFilter: (value, record: ServiceProps) =>
+      onFilter: (value, record: GetUserResponsableJobsResponse[number]) =>
         record.department.name === (value as string),
       render: (_, record) => (
         <span className="block truncate max-w-24">
@@ -140,7 +234,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
         </span>
       ),
       key: 'priority',
-      render: (record: ServiceProps) => {
+      render: (record: GetUserResponsableJobsResponse[number]) => {
         return (
           <span
             className={priorityVariants({
@@ -154,8 +248,34 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       filters: priorities,
       width: '10%',
       align: 'center',
-      onFilter: (value, record: ServiceProps) =>
+      onFilter: (value, record: GetUserResponsableJobsResponse[number]) =>
         record.priority === (value as string),
+    },
+    {
+      title: (
+        <span className="flex text-xs items-center justify-center gap-2 text-zinc-500 font-light">
+          Responsável exec. <ArrowDown className="size-4 text-zinc-400" />
+        </span>
+      ),
+      dataIndex: ['responsable', 'name'],
+      key: 'responsable.name',
+      className: 'font-semibold',
+      filters: [
+        { text: 'Não definido', value: 'undefined' },
+        ...(responsable ?? []),
+      ],
+      width: '20%',
+      onFilter: (value, record: GetUserResponsableJobsResponse[number]) => {
+        if (value === 'undefined') {
+          return !record.responsable;
+        }
+        return record.responsable?.name === value;
+      },
+      render: (text: string) => (
+        <span className="block truncate max-w-28">
+          {text ? text : 'Não definido'}
+        </span>
+      ),
     },
     {
       title: (
@@ -166,17 +286,17 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
       dataIndex: 'status',
       key: 'status',
       className: 'font-semibold',
-      width: '20%',
+      width: '18%',
       align: 'center',
     },
     {
       key: 'actions',
       width: '5%',
-      render: (record: ServiceProps) => (
+      render: (record: GetUserResponsableJobsResponse[number]) => (
         <div className="flex items-center justify-center gap-3">
           <Popconfirm
             title="Tem certeza que deseja deletar?"
-            onConfirm={() => handleDeleteService(record.id)}
+            onConfirm={() => handleDeleteJob(record.id)}
             okText="Sim"
             cancelText="Não"
           >
@@ -197,13 +317,25 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
     setSearchText(e.target.value);
   };
 
-  const filteredData =
-    data &&
-    data.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchText.toLowerCase()),
-      ),
-    );
+  const filteredData: GetUserResponsableJobsResponse = React.useMemo(() => {
+    if (!jobs || !searchText) {
+      return jobs as GetUserResponsableJobsResponse; // Retorna todos os jobs se não houver pesquisa
+    }
+
+    const lowerCaseSearchText = searchText.toLowerCase();
+
+    return jobs.filter(
+      (item): item is GetUserResponsableJobsResponse[number] => {
+        return Object.keys(item).some((key) => {
+          const value =
+            item[key as keyof GetUserResponsableJobsResponse[number]];
+          return (
+            value && String(value).toLowerCase().includes(lowerCaseSearchText)
+          );
+        });
+      },
+    ) as GetUserResponsableJobsResponse;
+  }, [jobs, searchText]);
 
   return (
     <section className="w-full">
@@ -228,7 +360,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
                   }}
                   maxDate={new Date()}
                   placeholderText="Selecione o período"
-                  disabled={serviceFilterIsLoading}
+                  disabled={isLoadingJobs}
                 />
 
                 <CalendarFold className="size-4" />
@@ -244,7 +376,7 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
                   onChange={(event) => {
                     setCheckedServiceAccomplished(event?.target.checked);
                   }}
-                  disabled={serviceFilterIsLoading}
+                  disabled={isLoadingJobs}
                 />
                 <label htmlFor="finalized" className="text-zinc-500 text-sm">
                   Serviços finalizados
@@ -253,15 +385,9 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
 
               <button
                 className="bg-green-400 text-sm h-6 px-5 rounded-lg hover:bg-green-500"
-                onClick={() =>
-                  handleFilteredServices(
-                    startDate,
-                    endDate,
-                    checkedServiceAccomplished,
-                  )
-                }
+                onClick={handleFilteredServices}
               >
-                {!serviceFilterIsLoading ? (
+                {!isLoadingJobs ? (
                   'Filtrar'
                 ) : (
                   <svg
@@ -298,22 +424,45 @@ export const ServicesTable: React.FC<ServicesByUserProps> = ({
         </div>
       </div>
 
-      {data && data.length > 0 ? (
-        <>
-          <Table
-            columns={columns}
-            dataSource={filteredData}
-            rowKey="id"
-            pagination={{ pageSize: 6, position: ['bottomCenter'] }}
-            className="bg-white rounded-xl mt-3"
-            scroll={{ x: true }}
-          />
-        </>
+      {isLoadingJobs ? (
+        <div className="flex flex-col w-full items-center justify-center mt-4">
+          <div className="w-full h-64">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                className="flex items-center justify-center px-2 py-[1px]"
+                key={i}
+              >
+                <Skeleton className="w-full h-10" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
-        <p className="text-center text-lg text-zinc-500 mt-28">
-          Não há serviços solicitados.
-        </p>
+        <>
+          {jobs && jobs.length > 0 ? (
+            <>
+              <Table
+                columns={columns}
+                dataSource={filteredData}
+                rowKey="id"
+                pagination={{ pageSize: 6, position: ['bottomCenter'] }}
+                className="bg-white rounded-xl mt-3"
+                scroll={{ x: true }}
+              />
+            </>
+          ) : (
+            <p className="text-center text-lg text-zinc-500 mt-28">
+              {accomplished
+                ? 'Não registro de solicitações encerradas.'
+                : 'Não há serviços solicitados.'}
+            </p>
+          )}
+        </>
       )}
+
+      <div className="flex items-center justify-end p-4">
+        <ExportJobsMetrics data={filteredData} />
+      </div>
     </section>
   );
-};
+}
