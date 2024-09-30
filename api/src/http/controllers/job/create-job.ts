@@ -73,5 +73,5 @@ export const createJobHandler = async (request: FastifyRequest) => {
     }),
   );
 
-  return { job };
+  return job;
 };

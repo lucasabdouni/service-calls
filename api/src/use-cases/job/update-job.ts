@@ -5,11 +5,12 @@ import { Role } from '@/repositories/user-repository';
 
 interface UpdateJobProps {
   local?: string;
-  problem?: string;
   problemDescription?: string;
   occurs_at?: Date;
   priority?: string;
   status?: string;
+  serviceId?: string;
+  responsableId?: string;
 }
 
 interface UpdateJobRequest {
@@ -50,12 +51,19 @@ export async function UpdateJobUseCase({
   const job = await updateJob({
     id: jobId,
     data: {
-      ...data,
-      responsable: {
+      service: {
         connect: {
-          id: userId,
+          id: data.serviceId,
         },
       },
+      responsable: {
+        connect: {
+          id: data.responsableId,
+        },
+      },
+      local: data.local,
+      status: data.status,
+      occurs_at: data.occurs_at,
     },
   });
 

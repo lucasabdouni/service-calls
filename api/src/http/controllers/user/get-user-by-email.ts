@@ -13,5 +13,5 @@ export const getServicesByUserEmailHandler = async (
 
   const { user } = await GetUserByEmailUseCase({ email: userEmail });
 
-  return { user };
+  return user;
 };

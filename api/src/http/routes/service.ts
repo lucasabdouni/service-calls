@@ -47,7 +47,7 @@ export async function serviceRoutes(app: FastifyInstance) {
   );
 
   app.withTypeProvider().delete(
-    '/service/:serviceId/',
+    '/service/:serviceId',
     {
       onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
     },

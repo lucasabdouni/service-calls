@@ -45,6 +45,7 @@ export async function PauseExecutionOfJobUseCase({
     id: findJob.id,
     elapsedTime,
     status,
+    responsableId: userId,
   });
 
   return { job };

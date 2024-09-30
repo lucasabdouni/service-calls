@@ -19,13 +19,19 @@ export async function DeleteJobUseCase({
     throw new ClientError(409, 'Job not found.');
   }
 
+  const userCreateJob = checkJobExists.user.id === userId;
+
   const departmentCheck = await findDepartment(checkJobExists.department.id);
 
   const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
     (item) => item.id === userId,
   );
 
-  if (role !== Role.ADMIN && !checkUserIsResponsibleDepartment) {
+  if (
+    role !== Role.ADMIN &&
+    !checkUserIsResponsibleDepartment &&
+    !userCreateJob
+  ) {
     throw new ClientError(
       403,
       'User not authorized to update this department.',

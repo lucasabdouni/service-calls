@@ -15,5 +15,5 @@ export const getJobHandler = async (request: FastifyRequest) => {
     jobId,
   });
 
-  return { job };
+  return job;
 };

@@ -28,5 +28,5 @@ export const createServiceHandler = async (request: FastifyRequest) => {
     role,
   });
 
-  return { service: service };
+  return service;
 };

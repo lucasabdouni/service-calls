@@ -37,7 +37,7 @@ export async function StartExecutionOfJobUseCase({
 
   const startTime = current_at;
 
-  const job = await startJob({ id: jobId, startTime });
+  const job = await startJob({ id: jobId, startTime, responsableId: userId });
 
   return { job };
 }

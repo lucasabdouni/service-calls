@@ -4,7 +4,7 @@ import { FastifyRequest } from 'fastify';
 export const getUserByIdHandler = async (request: FastifyRequest) => {
   const userId = request.user.sub;
 
-  const user = await GetUserUseCase({ userId });
+  const { user } = await GetUserUseCase({ userId });
 
-  return { user };
+  return user;
 };

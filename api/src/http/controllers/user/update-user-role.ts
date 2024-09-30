@@ -17,5 +17,5 @@ export const updateUserRoleHandler = async (request: FastifyRequest) => {
 
   const { user } = await UpdateUserRoleUseCase({ email, role });
 
-  return { user };
+  return user;
 };

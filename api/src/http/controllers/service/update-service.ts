@@ -33,5 +33,5 @@ export const updateServiceHandler = async (request: FastifyRequest) => {
     role,
   });
 
-  return { service: service };
+  return service;
 };

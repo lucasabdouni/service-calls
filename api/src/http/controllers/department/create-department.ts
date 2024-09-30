@@ -17,5 +17,5 @@ export const createDepartmentHandler = async (request: FastifyRequest) => {
     sigla,
   });
 
-  return { department: department };
+  return department;
 };

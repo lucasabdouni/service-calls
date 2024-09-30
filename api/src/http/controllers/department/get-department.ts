@@ -13,5 +13,5 @@ export const getDepartmentHandler = async (request: FastifyRequest) => {
 
   const { department } = await GetDepartmentUseCase({ departmentId });
 
-  return { department };
+  return department;
 };

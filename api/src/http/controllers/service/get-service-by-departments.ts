@@ -15,5 +15,5 @@ export const getServiceByDepartmentHandler = async (
 
   const { service } = await GetServiceByDepartmentUseCase({ departmentId });
 
-  return { service };
+  return service;
 };

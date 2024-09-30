@@ -74,6 +74,71 @@ export async function findJobs({
       created_at: true,
       occurs_at: true,
       start_time: true,
+      running: true,
+      elapsed_time: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
+    },
+  });
+
+  return jobs;
+}
+
+export async function findJobsInRunningByUserResponsableDepartments({
+  userId,
+}: {
+  userId: string;
+}) {
+  const user = await findUserById(userId);
+
+  const where = {
+    running: true,
+    ...(user?.role !== Role.ADMIN && {
+      department: {
+        id: { in: user?.departments_responsible.map((dep) => dep.id) },
+      },
+    }),
+  };
+
+  const jobs = await prisma.job.findMany({
+    where,
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      running: true,
+      priority: true,
+      status: true,
+      accomplished: true,
+      department: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
       elapsed_time: true,
       updatedAt: true,
       user: {
@@ -140,6 +205,7 @@ export async function findJobById(id: string) {
       status: true,
       accomplished: true,
       department: true,
+      running: true,
       created_at: true,
       occurs_at: true,
       start_time: true,
@@ -192,6 +258,7 @@ export async function findJobsByUserId(id: string) {
       occurs_at: true,
       start_time: true,
       elapsed_time: true,
+      running: true,
       updatedAt: true,
       user: {
         select: {
@@ -247,6 +314,7 @@ export async function updateJob({
       occurs_at: true,
       start_time: true,
       elapsed_time: true,
+      running: true,
       updatedAt: true,
       user: {
         select: {
@@ -294,9 +362,46 @@ export async function updateJobDepartment({
       responsable_id: null,
       ...data,
     },
-    include: {
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      priority: true,
+      status: true,
+      accomplished: true,
       department: true,
-      user: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
+      elapsed_time: true,
+      running: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
     },
   });
 
@@ -315,10 +420,46 @@ export async function updateJobService({
     data: {
       service_id: serviceId,
     },
-    include: {
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      priority: true,
+      status: true,
+      accomplished: true,
       department: true,
-      user: true,
-      service: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
+      elapsed_time: true,
+      running: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
     },
   });
 
@@ -337,10 +478,46 @@ export async function updateResponsableService({
     data: {
       responsable_id: responsableId,
     },
-    include: {
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      priority: true,
+      status: true,
+      accomplished: true,
       department: true,
-      user: true,
-      service: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
+      elapsed_time: true,
+      running: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
     },
   });
 
@@ -372,8 +549,9 @@ export async function deleteJob(id: string) {
   const job = await prisma.job.delete({
     where: { id },
     include: {
-      user: true,
+      responsable: true,
       service: true,
+      user: true,
     },
   });
 
@@ -384,10 +562,12 @@ export async function pauseJobInExecution({
   id,
   elapsedTime,
   status,
+  responsableId,
 }: {
   id: string;
   elapsedTime: number;
   status: string;
+  responsableId: string;
 }) {
   const job = await prisma.job.update({
     where: { id },
@@ -396,6 +576,48 @@ export async function pauseJobInExecution({
       status,
       elapsed_time: elapsedTime,
       start_time: 0,
+      responsable_id: responsableId,
+    },
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      priority: true,
+      status: true,
+      accomplished: true,
+      department: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
+      elapsed_time: true,
+      running: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
     },
   });
 
@@ -405,9 +627,11 @@ export async function pauseJobInExecution({
 export async function startJob({
   id,
   startTime,
+  responsableId,
 }: {
   id: string;
   startTime: number;
+  responsableId: string;
 }) {
   const job = await prisma.job.update({
     where: { id },
@@ -415,6 +639,49 @@ export async function startJob({
       running: true,
       status: 'Em execução',
       start_time: startTime,
+      occurs_at: new Date(),
+      responsable_id: responsableId,
+    },
+    select: {
+      id: true,
+      local: true,
+      problem_description: true,
+      priority: true,
+      status: true,
+      accomplished: true,
+      department: true,
+      created_at: true,
+      occurs_at: true,
+      start_time: true,
+      elapsed_time: true,
+      running: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      responsable: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          ramal: true,
+          registration_number: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          description: true,
+          name: true,
+          execution_time: true,
+        },
+      },
     },
   });
 

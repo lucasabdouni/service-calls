@@ -17,15 +17,13 @@ export async function ConfirmAccomplishedJobUseCase({
   userId,
   role,
 }: ConfirmAccomplishedJobRequest) {
-  const checkRequestExists = await findJobById(jobId);
+  const findJob = await findJobById(jobId);
 
-  if (!checkRequestExists) {
+  if (!findJob) {
     throw new ClientError(409, 'Request not found.');
   }
 
-  const departmentCheck = await findDepartment(
-    checkRequestExists.department.id,
-  );
+  const departmentCheck = await findDepartment(findJob.department.id);
 
   const checkUserIsResponsibleDepartment = departmentCheck?.responsables.some(
     (item) => item.id === userId,
@@ -38,11 +36,16 @@ export async function ConfirmAccomplishedJobUseCase({
     );
   }
 
+  const current_at = Date.now();
+  const elapsedTime = findJob.elapsed_time + (current_at - findJob.start_time);
+
   const job = await confirmAccomplisheJob({
     id: jobId,
     data: {
+      running: false,
       accomplished: true,
       status: 'Finalizado',
+      elapsed_time: elapsedTime,
     },
   });
 

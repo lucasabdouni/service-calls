@@ -4,5 +4,5 @@ import { FastifyRequest } from 'fastify';
 export const getServicesHandler = async (request: FastifyRequest) => {
   const { services } = await GetServicesUseCase();
 
-  return { services };
+  return services;
 };

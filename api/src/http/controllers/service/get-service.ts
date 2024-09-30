@@ -13,5 +13,5 @@ export const getServiceHandler = async (request: FastifyRequest) => {
 
   const { service } = await GetServiceUseCase({ serviceId });
 
-  return { service };
+  return service;
 };

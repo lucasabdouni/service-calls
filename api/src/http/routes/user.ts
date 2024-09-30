@@ -33,16 +33,12 @@ export async function userRoutes(app: FastifyInstance) {
 
   app
     .withTypeProvider()
-    .get(
-      '/user-metrics/:userId',
-      { onRequest: [verifyJwt] },
-      getUserMetricsHandler,
-    );
+    .get('/user-metrics', { onRequest: [verifyJwt] }, getUserMetricsHandler);
 
   app
     .withTypeProvider()
     .put(
-      '/user/:id/update-departments-responsable',
+      '/update-departments-responsable/:userId',
       { onRequest: [verifyJwt, verifyUserRole(Role.ADMIN)] },
       updateUserResponsibilitiesDepartmentHandler,
     );

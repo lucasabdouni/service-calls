@@ -13,5 +13,5 @@ export const getJobsByUserIdHandler = async (request: FastifyRequest) => {
 
   const { jobs } = await GetJobsByUserUseCase({ userId });
 
-  return { jobs };
+  return jobs;
 };

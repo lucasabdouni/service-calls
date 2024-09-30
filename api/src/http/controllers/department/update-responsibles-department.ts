@@ -24,5 +24,5 @@ export const updateDepartmentResponsibilitiesHandler = async (
     addUserIds,
     removeUserIds,
   });
-  return { department: department };
+  return department;
 };

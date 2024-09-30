@@ -21,11 +21,11 @@ export const updateUserResponsibilitiesDepartmentHandler = async (
   );
   const { userId } = paramsSchema.parse(request.params);
 
-  const user = await UpdateUserResponsiblesDepartmentUseCase({
+  const { user } = await UpdateUserResponsiblesDepartmentUseCase({
     userId,
     addDepartmentsIds,
     removeDepartmentsIds,
   });
 
-  return { user: user };
+  return user;
 };

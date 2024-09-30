@@ -25,10 +25,11 @@ export async function updateService({
 }
 
 export async function findServices() {
-  const departments = await prisma.department.findMany({
+  const services = await prisma.department.findMany({
     include: {
       services: {
         select: {
+          id: true,
           name: true,
           description: true,
           execution_time: true,
@@ -37,12 +38,11 @@ export async function findServices() {
     },
   });
 
-  return departments.map((department) => ({
-    department: {
-      name: department.name,
-      sigla: department.sigla,
-      services: department.services,
-    },
+  return services.map((department) => ({
+    id: department.id,
+    name: department.name,
+    sigla: department.sigla,
+    services: department.services,
   }));
 }
 
@@ -60,28 +60,13 @@ export async function findService(id: string) {
 }
 
 export async function findServiceByDepartmentId(departmentId: string) {
-  const departmentWithServices = await prisma.department.findUnique({
+  const services = await prisma.service.findMany({
     where: {
-      id: departmentId,
-    },
-    include: {
-      services: {
-        select: {
-          name: true,
-          description: true,
-          execution_time: true,
-        },
-      },
+      department_id: departmentId,
     },
   });
 
-  return {
-    department: {
-      name: departmentWithServices?.name,
-      sigla: departmentWithServices?.sigla,
-      services: departmentWithServices?.services,
-    },
-  };
+  return services;
 }
 
 export async function deleteService(serviceId: string) {
