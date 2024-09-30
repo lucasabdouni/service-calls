@@ -1,13 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import {
-  getDepartments,
-  getDepartmentsResponse,
-} from '../../api/get-departments';
+import { getDepartments } from '../../api/get-departments';
 import { updateDepartment } from '../../api/update-department';
 import { Button } from '../../components/button';
 import { notify } from '../../components/notification';
@@ -36,7 +33,6 @@ export function EditDepartmentModal({
 }: EditLinkModalProps) {
   const [selectedDepartment, setSelectedDepartment] =
     useState<DepartmentProps | null>(null);
-  const queryClient = useQueryClient();
 
   const { data: departments, isLoading: isLoadingDepartments } = useQuery({
     queryKey: ['departments'],
@@ -58,39 +54,8 @@ export function EditDepartmentModal({
     return;
   }
 
-  function updateDepartmentsOnCache(updatedDepartment: DepartmentProps) {
-    const departmentsCache = queryClient.getQueriesData<getDepartmentsResponse>(
-      {
-        queryKey: ['departments'],
-      },
-    );
-
-    departmentsCache.forEach(([cacheKey, cacheData]) => {
-      if (!cacheData) {
-        return;
-      }
-
-      const updatedDepartments = {
-        ...cacheData,
-        departments: cacheData.map((item) => {
-          if (item.id === updatedDepartment.id) {
-            return updatedDepartment;
-          }
-        }),
-      };
-
-      queryClient.setQueryData<getDepartmentsResponse>(
-        cacheKey,
-        updatedDepartments,
-      );
-    });
-  }
-
   const { mutateAsync: updateDepartmentFn } = useMutation({
     mutationFn: updateDepartment,
-    //  onSuccess: (data) => {
-    //    updateDepartmentsOnCache(data);
-    //  },
   });
 
   const {
