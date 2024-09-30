@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useContext, useEffect } from 'react';
 import { GetJobByIdResponse } from '../api/update-job';
 import { AuthContext } from '../context/AuthContext';
+import { env } from '../env';
 
 interface useJobDetailsWebSocketsParams {
   jobId: string;
@@ -22,7 +23,7 @@ export function useJobDetailsWebSockets({
   useEffect(() => {
     if (loading || isLoadingProfile) return;
 
-    const ws = new WebSocket(`ws://localhost:3333/job/${jobId}/ws`);
+    const ws = new WebSocket(`${env.VITE_API_SOCKET_URL}/job/${jobId}/ws`);
 
     ws.onopen = () => {
       if (isAuthenticated && user) {
