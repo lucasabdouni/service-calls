@@ -1,6 +1,7 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
 import { UpdateResponsableJobUseCase } from '@/use-cases/job/update-responsable-job';
+import { connections } from '@/websocket/jobs/socketManager';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
@@ -30,6 +31,14 @@ export const updateResponsableJobHandler = async (request: FastifyRequest) => {
     userId,
     role,
   });
+
+  const clients = connections.get(jobId);
+  if (clients) {
+    console.log('envou msg para os clientes');
+    clients.forEach((client) => {
+      client.send(JSON.stringify({ type: 'JOB_UPDATED', job }));
+    });
+  }
 
   const mail = await getMailClient();
 
@@ -64,5 +73,5 @@ export const updateResponsableJobHandler = async (request: FastifyRequest) => {
 
   console.log(nodemailer.getTestMessageUrl(message));
 
-  return { job: job };
+  return job;
 };

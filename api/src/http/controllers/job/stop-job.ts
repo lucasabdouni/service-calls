@@ -1,16 +1,10 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
-import { UpdateServiceJobUseCase } from '@/use-cases/job/update-service-job';
+import { PauseExecutionOfJobUseCase } from '@/use-cases/job/pause-execution-of-job';
 import { connections } from '@/websocket/jobs/socketManager';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
-
-const bodySchema = z.object({
-  serviceId: z
-    .string({ message: 'Service is mandatory' })
-    .uuid({ message: 'Service id is invalid' }),
-});
 
 const paramsSchema = z.object({
   jobId: z
@@ -18,31 +12,27 @@ const paramsSchema = z.object({
     .uuid({ message: 'Id is invalid' }),
 });
 
-export const updateServiceJobHandler = async (request: FastifyRequest) => {
-  const { serviceId } = bodySchema.parse(request.body);
+export const stopJobHandler = async (request: FastifyRequest) => {
   const { jobId } = paramsSchema.parse(request.params);
-
   const { role } = request.user;
   const userId = request.user.sub;
 
-  const { job } = await UpdateServiceJobUseCase({
+  const { job } = await PauseExecutionOfJobUseCase({
     jobId,
-    serviceId,
     userId,
     role,
   });
 
-  const mail = await getMailClient();
-
-  const jobLink = `${env.WEB_URL}/servico/${job.id}`;
-
   const clients = connections.get(jobId);
   if (clients) {
-    console.log('envou msg para os clientes');
     clients.forEach((client) => {
       client.send(JSON.stringify({ type: 'JOB_UPDATED', job }));
     });
   }
+
+  const mail = await getMailClient();
+
+  const jobLink = `${env.WEB_URL}/servico/${job.id}`;
 
   const message = await mail.sendMail({
     from: {

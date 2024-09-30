@@ -8,6 +8,10 @@ import { deleteJobHandler } from '../controllers/job/delete-job-request';
 import { getJobHandler } from '../controllers/job/get-job';
 import { getJobsHandler } from '../controllers/job/get-jobs';
 import { getJobsByUserIdHandler } from '../controllers/job/get-jobs-by-user-id';
+import { getUserResponsableJobsHandler } from '../controllers/job/get-user-responsable-jobs';
+import { getJobsInRunningByUserResponsableDepartmentsHandler } from '../controllers/job/get-user-responsable-jobs-in-running';
+import { startJobHandler } from '../controllers/job/start-job';
+import { stopJobHandler } from '../controllers/job/stop-job';
 import { transferDepartmentJobHandler } from '../controllers/job/transfer-department-job';
 import { updateJobHandler } from '../controllers/job/update-job';
 import { updateResponsableJobHandler } from '../controllers/job/update-responsable-job';
@@ -21,10 +25,27 @@ export async function jobRoutes(app: FastifyInstance) {
   app.withTypeProvider().get(
     '/jobs',
     {
-      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+      onRequest: [verifyJwt],
     },
     getJobsHandler,
   );
+
+  app.withTypeProvider().get(
+    '/job/user-responsable',
+    {
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+    },
+    getUserResponsableJobsHandler,
+  );
+
+  app.withTypeProvider().get(
+    '/job/running',
+    {
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+    },
+    getJobsInRunningByUserResponsableDepartmentsHandler,
+  );
+
   app.withTypeProvider().get('/job/:jobId', getJobHandler);
 
   app.withTypeProvider().put(
@@ -33,6 +54,22 @@ export async function jobRoutes(app: FastifyInstance) {
       onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
     },
     updateJobHandler,
+  );
+
+  app.withTypeProvider().put(
+    '/job/:jobId/start',
+    {
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+    },
+    startJobHandler,
+  );
+
+  app.withTypeProvider().put(
+    '/job/:jobId/stop',
+    {
+      onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],
+    },
+    stopJobHandler,
   );
 
   app.withTypeProvider().put(
@@ -66,6 +103,7 @@ export async function jobRoutes(app: FastifyInstance) {
     },
     getJobsByUserIdHandler,
   );
+
   app.withTypeProvider().delete(
     '/job/:jobId',
     {
@@ -73,7 +111,7 @@ export async function jobRoutes(app: FastifyInstance) {
     },
     deleteJobHandler,
   );
-  app.withTypeProvider().get(
+  app.withTypeProvider().put(
     '/job/accomplished/:jobId',
     {
       onRequest: [verifyJwt, verifyUserRole(Role.ADMIN, Role.RESPONSIBLE)],

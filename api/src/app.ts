@@ -12,13 +12,15 @@ import { serviceRoutes } from './http/routes/service';
 import { userRoutes } from './http/routes/user';
 import { pauseJobServices } from './jobs/taskHandlers/pauseJobServices';
 import { resumeJobServices } from './jobs/taskHandlers/resumeJobServices';
-import { initializeSocket } from './websocket/socketManager';
+import { socketManagerJobs } from './websocket/jobs/socketManager';
 
 export const app = fastify();
 
 app.register(cors, {
   origin: '*',
 });
+
+app.register(fastifyWebsocket);
 
 app.register(fastifyCron, {
   jobs: [
@@ -46,8 +48,6 @@ app.register(fastifyJwt, {
   },
 });
 
-app.register(fastifyWebsocket);
-
 app.setErrorHandler(errorHandler);
 
 app.register(authenticateRoutes);
@@ -55,4 +55,4 @@ app.register(userRoutes);
 app.register(jobRoutes);
 app.register(departmentRoutes);
 app.register(serviceRoutes);
-app.register(initializeSocket);
+app.register(socketManagerJobs);

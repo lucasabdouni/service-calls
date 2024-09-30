@@ -1,5 +1,5 @@
 import { ClientError } from '@/errors/client-erro';
-import { findServicesByUserId } from '@/repositories/service-repository';
+import { findJobsByUserId } from '@/repositories/job-repository';
 import { findUserById } from '@/repositories/user-repository';
 
 interface GetUserMetricsRequest {
@@ -11,15 +11,14 @@ export async function GetUserMetricsUseCase({ userId }: GetUserMetricsRequest) {
 
   if (!user) throw new ClientError(409, 'User not found.');
 
-  const services = await findServicesByUserId(userId);
+  const jobs = await findJobsByUserId(userId);
 
-  if (!services) throw new ClientError(409, 'No services registered.');
+  if (!jobs) throw new ClientError(409, 'No jobs registered.');
 
   const metrics = {
-    requests: services.length,
-    openRequests: services.filter((item) => item.accomplished !== false).length,
-    performedRequests: services.filter((item) => item.accomplished === true)
-      .length,
+    requests: jobs.length,
+    openRequests: jobs.filter((item) => item.accomplished !== false).length,
+    performedRequests: jobs.filter((item) => item.accomplished === true).length,
   };
 
   return { metrics };

@@ -1,6 +1,7 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
 import { TransferDepartmentJobUseCase } from '@/use-cases/job/transfer-department-job';
+import { connections } from '@/websocket/jobs/socketManager';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
@@ -31,6 +32,14 @@ export const transferDepartmentJobHandler = async (request: FastifyRequest) => {
       userId,
       role,
     });
+
+  const clients = connections.get(jobId);
+  if (clients) {
+    console.log('envou msg para os clientes');
+    clients.forEach((client) => {
+      client.send(JSON.stringify({ type: 'JOB_UPDATED', job }));
+    });
+  }
 
   const mail = await getMailClient();
 
@@ -70,5 +79,5 @@ export const transferDepartmentJobHandler = async (request: FastifyRequest) => {
     }),
   );
 
-  return { job: job };
+  return job;
 };

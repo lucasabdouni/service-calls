@@ -1,6 +1,7 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
 import { ConfirmAccomplishedJobUseCase } from '@/use-cases/job/confirm-accomplished-job';
+import { connections } from '@/websocket/jobs/socketManager';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
@@ -19,6 +20,13 @@ export const confirmAccomplishedJobHandler = async (
   const userId = request.user.sub;
 
   const { job } = await ConfirmAccomplishedJobUseCase({ jobId, userId, role });
+
+  const clients = connections.get(jobId);
+  if (clients) {
+    clients.forEach((client) => {
+      client.send(JSON.stringify({ type: 'JOB_UPDATED', job }));
+    });
+  }
 
   const mail = await getMailClient();
 

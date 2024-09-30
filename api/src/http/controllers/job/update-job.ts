@@ -1,6 +1,7 @@
 import { env } from '@/env';
 import { getMailClient } from '@/lib/mail';
 import { UpdateJobUseCase } from '@/use-cases/job/update-job';
+import { connections } from '@/websocket/jobs/socketManager';
 import { FastifyRequest } from 'fastify';
 import nodemailer from 'nodemailer';
 import z from 'zod';
@@ -12,6 +13,14 @@ const bodySchema = z.object({
   problemDescription: z.string().optional(),
   priority: PriorityEnum.optional(),
   occurs_at: z.coerce.date().optional(),
+  serviceId: z
+    .string({ message: 'Id is invalid' })
+    .uuid({ message: 'Id is invalid' })
+    .optional(),
+  responsableId: z
+    .string({ message: 'Id is invalid' })
+    .uuid({ message: 'Id is invalid' })
+    .optional(),
   status: z.string().optional(),
 });
 
@@ -33,6 +42,14 @@ export const updateJobHandler = async (request: FastifyRequest) => {
     userId,
     role,
   });
+
+  const clients = connections.get(jobId);
+  if (clients) {
+    console.log('envou msg para os clientes');
+    clients.forEach((client) => {
+      client.send(JSON.stringify({ type: 'JOB_UPDATED', job }));
+    });
+  }
 
   const mail = await getMailClient();
 
@@ -67,5 +84,5 @@ export const updateJobHandler = async (request: FastifyRequest) => {
 
   console.log(nodemailer.getTestMessageUrl(message));
 
-  return { job: job };
+  return job;
 };
