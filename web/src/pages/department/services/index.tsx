@@ -47,7 +47,7 @@ export default function ServicesDepartment() {
   );
 
   const [selectedDepartment, setSelectedDepartment] = useState<string>(
-    user.departments_responsible[0].id,
+    user.departments_responsible?.[0]?.id || '',
   );
 
   const { data: services, isLoading: isLoadingServices } = useQuery({
