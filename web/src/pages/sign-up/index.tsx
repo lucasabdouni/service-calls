@@ -1,18 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { signUp } from '../../api/sign-up';
 import { Button } from '../../components/button';
 import { Input } from '../../components/input';
 import { InputPassword } from '../../components/inputPassword';
 import { notify } from '../../components/notification';
-import { api } from '../../lib/axios';
 
 const registerFormSchema = z
   .object({
     email: z.string().email({ message: 'O email informado não é valido.' }),
-    name: z.string().min(3, { message: 'O nome informado é invalido.' }),
+    name: z.string().min(3, { message: 'O nome informado é i-nvalido.' }),
     matricula: z
       .string()
       .min(2, { message: 'A matricula necessita ser preechida.' }),
@@ -44,6 +45,10 @@ export function SignUp() {
     resolver: zodResolver(registerFormSchema),
   });
 
+  const { mutateAsync: signUpFn } = useMutation({
+    mutationFn: signUp,
+  });
+
   const specificErrorMessages: Record<number, Record<string, string>> = {
     409: {
       'E-mail already registered': 'E-mail já cadastrado.',
@@ -57,18 +62,22 @@ export function SignUp() {
 
   async function handleRegister(data: RegisterFormData) {
     try {
-      await api.post('/user', {
+      await signUpFn({
         name: data.name,
         email: data.email,
-        registration_number: Number(data.matricula),
+        registrationNumber: Number(data.matricula),
         department: data.departamento,
         ramal: Number(data.ramal),
         password: data.password,
       });
 
-      notify({ type: 'success', message: 'Cadastro realizado com sucesso.', description: 'Sua conta foi criada com sucesso.' });
+      notify({
+        type: 'success',
+        message: 'Cadastro realizado com sucesso.',
+        description: 'Sua conta foi criada com sucesso.',
+      });
 
-      navigate('/');
+      navigate(`/?email=${data.email}`);
     } catch (err) {
       if (err instanceof AxiosError) {
         const statusCode = err.response?.status;
@@ -79,11 +88,24 @@ export function SignUp() {
           errorMessage &&
           specificErrorMessages[statusCode]?.[errorMessage]
         ) {
-          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: specificErrorMessages[statusCode][errorMessage] });
+          notify({
+            type: 'error',
+            message: 'Erro ao tentar cadastrar.',
+            description: specificErrorMessages[statusCode][errorMessage],
+          });
         } else if (statusCode && generalErrorMessages[statusCode]) {
-          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: generalErrorMessages[statusCode] });
+          notify({
+            type: 'error',
+            message: 'Erro ao tentar cadastrar.',
+            description: generalErrorMessages[statusCode],
+          });
         } else {
-          notify({ type: 'error', message: 'Erro ao tentar cadastrar.', description: 'Houve um problema durante o cadastro. Tente novamente mais tarde.' });
+          notify({
+            type: 'error',
+            message: 'Erro ao tentar cadastrar.',
+            description:
+              'Houve um problema durante o cadastro. Tente novamente mais tarde.',
+          });
         }
       }
     }
@@ -104,7 +126,6 @@ export function SignUp() {
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleRegister)}
         >
-          
           <Input
             type="text"
             placeholder="Nome"

@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Mail } from 'lucide-react';
 import { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '../../components/button';
 import { Input } from '../../components/input';
@@ -21,6 +21,7 @@ type LoginFormData = z.infer<typeof loginFormSchema>;
 
 export function SignIn() {
   const { signIn, isAuthenticated } = useContext(AuthContext);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const {
     register,
@@ -28,6 +29,9 @@ export function SignIn() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: searchParams.get('email') ?? '',
+    },
   });
 
   useEffect(() => {
@@ -39,7 +43,11 @@ export function SignIn() {
   async function handleLogin(data: LoginFormData) {
     await signIn(data).then((error) => {
       if (error) {
-        notify({ type: 'error', message: 'Erro ao tentar fazer login.', description: error });
+        notify({
+          type: 'error',
+          message: 'Erro ao tentar fazer login.',
+          description: error,
+        });
       }
     });
   }
@@ -59,7 +67,6 @@ export function SignIn() {
           className="flex flex-col gap-2 mt-8"
           onSubmit={handleSubmit(handleLogin)}
         >
-
           <Input
             type="email"
             placeholder="E-mail"

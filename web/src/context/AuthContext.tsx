@@ -1,6 +1,9 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { ReactNode, createContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authenticate } from '../api/authenticate';
+import { getProfile, getProfileResponse } from '../api/get-profile';
 import { notify } from '../components/notification';
 import { api } from '../lib/axios';
 import { UserProps } from '../types/user';
@@ -13,9 +16,10 @@ interface SignInCredentials {
 interface AuthContextData {
   signIn: (credentials: SignInCredentials) => Promise<void | string>;
   signOut: () => Promise<void>;
-  user: UserProps;
   loading: boolean;
+  isLoadingProfile: boolean;
   isAuthenticated: boolean;
+  user: getProfileResponse;
 }
 
 type AuthProviderProps = {
@@ -25,49 +29,76 @@ type AuthProviderProps = {
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<UserProps>({} as UserProps);
+  const [user, setUser] = useState<getProfileResponse>(
+    {} as getProfileResponse,
+  );
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!user.id;
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem('token');
+  const queryClient = useQueryClient();
 
-      if (token) {
-        try {
-          api.defaults.headers.Authorization = `Bearer ${token}`;
+  const { mutateAsync: session } = useMutation({
+    mutationFn: authenticate,
+  });
 
-          const response = await api.get('/me');
-          setUser(response.data.user);
-        } catch (error) {
-          setUser({} as UserProps);
-          localStorage.removeItem('token');
-          navigate('/');
-        }
-      }
-
+  const fetchUser = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+      const user = await getProfile();
+      return user;
+    } else {
+      setUser({} as UserProps);
       setLoading(false);
-    };
+      navigate('/');
+      return null;
+    }
+  };
 
-    fetchData();
-  }, []);
+  const {
+    data: userFetch,
+    isLoading: isLoadingProfile,
+    isSuccess,
+    isError,
+  } = useQuery({
+    retry: false,
+    queryKey: ['user'],
+    queryFn: fetchUser,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (userFetch && isSuccess) {
+      setUser(userFetch);
+      setLoading(false);
+    }
+  }, [userFetch, isSuccess]);
+
+  useEffect(() => {
+    if (!isLoadingProfile && isError) {
+      setUser({} as UserProps);
+      localStorage.removeItem('token');
+      navigate('/');
+    }
+  }, [isLoadingProfile, isError]);
 
   async function signIn({
     email,
     password,
   }: SignInCredentials): Promise<string | undefined> {
     try {
-      const response = await api.post('/sessions', {
+      const { token } = await session({
         email,
         password,
       });
 
-      const { token } = response.data;
-
       localStorage.setItem('token', token);
 
       api.defaults.headers.Authorization = `Bearer ${token}`;
+
+      navigate('/dashboard');
 
       notify({
         type: 'success',
@@ -75,11 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         description: 'Bem-vindo de volta!',
       });
 
-      const responseGetUser = await api.get('/me');
-
-      setUser(responseGetUser.data.user);
-
-      navigate('/dashboard');
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (
@@ -96,8 +123,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signOut() {
     try {
-      setUser({} as UserProps);
       localStorage.removeItem('token');
+      queryClient.removeQueries({ queryKey: ['user'] });
       navigate('/');
     } catch (error) {
       // Handle error (if any)
@@ -106,7 +133,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ user, signIn, isAuthenticated, signOut, loading }}
+      value={{
+        signIn,
+        isAuthenticated,
+        signOut,
+        loading,
+        user,
+        isLoadingProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
