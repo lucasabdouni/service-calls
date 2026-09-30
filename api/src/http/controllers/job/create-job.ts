@@ -48,7 +48,7 @@ export const createJobHandler = async (request: FastifyRequest) => {
       const message = await mail.sendMail({
         from: {
           name: 'Portal de Chamados',
-          address: 'no-reply@cinbal.com.br',
+          address: 'no-reply@app.com.br',
         },
         to: responsable.email,
         subject: `Nova requisição de serviço: ${job.service && job.service.name}`,
