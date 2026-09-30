@@ -50,7 +50,7 @@ export const transferDepartmentJobHandler = async (request: FastifyRequest) => {
       const message = await mail.sendMail({
         from: {
           name: 'Gerenciador de Serviços',
-          address: 'no-reply@cinbal.com.br',
+          address: 'no-reply@app.com.br',
         },
         to: responsable.email,
         subject: `Requisição de serviço direcionada: `,
