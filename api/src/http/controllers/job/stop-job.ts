@@ -37,7 +37,7 @@ export const stopJobHandler = async (request: FastifyRequest) => {
   const message = await mail.sendMail({
     from: {
       name: 'Gerenciador de Serviços',
-      address: 'no-reply@cinbal.com.br',
+      address: 'no-reply@app.com.br',
     },
     to: job.user.email,
     subject: `Requisição de serviço atualizada: ${job.service?.name} `,
